@@ -1,0 +1,13 @@
+﻿# Set default behavior to automatically normalize line endings.
+text=auto
+
+# Force several file types to always use LF line endings so that if a repo is accessed
+*.md eol=lf encoding=UTF-8
+*.yaml eol=lf encoding=UTF-8
+
+# Force several file types to always use LF line endings so that if a repo is accessed
+*.ps1 eol=crlf encoding=UTF-8
+*.psm1 eol=crlf encoding=UTF-8
+*.psd1 eol=crlf encoding=UTF-8
+*.bat eol=crlf encoding=UTF-8
+*.cmd eol=crlf encoding=UTF-8

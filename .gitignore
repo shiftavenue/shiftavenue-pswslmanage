@@ -1,0 +1,12 @@
+﻿# common
+.zip
+.exe
+.dll
+
+# Files created by some graphic cards
+DawnCache
+GPUCache
+debug.log
+
+# Secret files 
+.secret

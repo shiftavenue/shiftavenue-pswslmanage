@@ -1,0 +1,14 @@
+{
+    "wslDistroList": [
+        {
+            "wslDistroUniqueName": "Ubuntu2004",
+            "wslDistroUrl":"https://aka.ms/wslubuntu2004",
+            "wslDistroX64FileName":"Ubuntu_2004.2021.825.0_x64"
+        },
+        {
+            "wslDistroUniqueName": "Ubuntu2204",
+            "wslDistroUrl":"https://aka.ms/wslubuntu2204",
+            "wslDistroX64FileName":"Ubuntu_2204.1.7.0_x64"
+        }
+    ]
+}
