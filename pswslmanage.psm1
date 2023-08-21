@@ -7,8 +7,7 @@
 ##		- You must be running Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11.
 ###############################################################################################################
 
-
-function Add-WSLImage {
+function Add-WslImage {
     <#
         .SYNOPSIS
             Install a WSL on your local maschine.
@@ -17,7 +16,8 @@ function Add-WSLImage {
             Install a WSL on your local maschine which will be well-configured and has created 2 users.
 
         .PARAMETER WslConfigPath
-            The path to an JSON formatted configuration file.
+            The path to an JSON formatted configuration file. Default is "$PSScriptRoot/pswslmanage.secret".
+            If fiel exist but you want to work with parameters, please specify parameter with an empty string.
             Example for a configuration file:
             {
                 "wslBasePath":"${env:localappdata}\\<YOURPROJECT>\\wsl",
@@ -36,6 +36,9 @@ function Add-WSLImage {
                 "wslSshServerPort":30122,
                 "wslDistroName":"Ubuntu2204"
             }
+
+        .PARAMETER WslBasePath
+            The work directory used for all files. Default is "${env:localappdata}\shiftavenue\wsl".
 
         .PARAMETER WslName
             The name of the WSL-image you want to create.
@@ -87,6 +90,9 @@ function Add-WSLImage {
         [string]$WslConfigPath="$PSScriptRoot/pswslmanage.secret",
 
         [Parameter(Mandatory=$false)]
+        [string]$WslBasePath = "${env:localappdata}\shiftavenue\wsl",
+
+        [Parameter(Mandatory=$false)]
         [string]$WslName = "MyProject",
 
         [Parameter(Mandatory=$false)]
@@ -118,6 +124,8 @@ function Add-WSLImage {
         [string]$WslDistroName
     )
 
+    . $PSScriptRoot/pswslmanage-helper.ps1
+
     # Show header
     # Generated with https://textkool.com/en/ascii-art-generator?hl=default&vl=default&font=Standard&text=WSL
     Write-Output "__        ______  _     "
@@ -126,11 +134,6 @@ function Add-WSLImage {
     Write-Output "  \ V  V /  ___) | |___ "
     Write-Output "   \_/\_/  |____/|_____|"
     Write-Output "Installation script for a WSL image"
-
-    ##################################################################################
-    # Include helper
-    ##################################################################################
-    . $PSScriptRoot/pswslmanage-helper.ps1
 
     ##################################################################################
     # Set static variables
@@ -165,7 +168,7 @@ function Add-WSLImage {
 
     if($null -eq $_wslJson) {
         Write-Output "No configuration file found"
-        [string]$_wslBasePath = "${env:localappdata}\shiftavenue\wsl"
+        [string]$_wslBasePath = $WslBasePath
         [string]$_wslName = $WslName
         [bool]$_wslRemoveExisting = $WslRemoveExisting
         [string]$_wslRootPwd = $WslRootPwd
@@ -345,14 +348,14 @@ function Add-WSLImage {
     # Manage the VM (update and all that shit)
     #######################################################
 
-    Write-Output "Update packages"
-    Invoke-WSLCommand -Distribution $_wslName -Command "sudo apt update -y" -User root
+    Write-Output "Update packages (Please be patient, this can take a while)"
+    Invoke-WSLCommand -Distribution $_wslName -Command "sudo apt update -y > /dev/null 2>&1" -User root
 
     Write-Output "Upgrade packages (Please be patient, this can take a while)"
-    Invoke-WSLCommand -Distribution $_wslName -Command "sudo apt upgrade -y" -User root
+    Invoke-WSLCommand -Distribution $_wslName -Command "sudo apt upgrade -y > /dev/null 2>&1" -User root
 
     Write-Output "Removing packages that are not needed anymore"
-    Invoke-WSLCommand -Distribution $_wslName -Command "sudo apt autoremove -y" -User root
+    Invoke-WSLCommand -Distribution $_wslName -Command "sudo apt autoremove -y > /dev/null 2>&1" -User root
 
     #######################################################
     # Manage the users in WSL image
@@ -369,7 +372,7 @@ function Add-WSLImage {
         Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""chmod +x /root/manage-users.sh""" -User root
 
         Write-Output "Invoke manage user command for work user"
-        $_wslBashCommand=$ExecutionContext.InvokeCommand.ExpandString("/root/manage-users.sh --username ""$_wslWorkUser"" --password ""$_wslWorkUserPwd"" --pubkey ""$_wslWorkUserSSHPubKey"" --sudoperm 1")
+        $_wslBashCommand=$ExecutionContext.InvokeCommand.ExpandString("/root/manage-users.sh --username ""$_wslWorkUser"" --password ""$_wslWorkUserPwd"" --pubkey ""$_wslWorkUserSSHPubKey"" --sudoperm 1 > /dev/null 2>&1")
         Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""$_wslBashCommand""" -User root
 
         Write-Output "Remove the user management script from WSL"
@@ -410,5 +413,72 @@ function Add-WSLImage {
     $_wslCmdReturn=$?
     if($_wslCmdReturn -ne $True) {
         throw "Failed to import. Leaving."
+    }
+}
+
+function Test-WslImage {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$WslName
+    )
+
+    . $PSScriptRoot/pswslmanage-helper.ps1
+
+    if($null -eq (Get-WslImage -WslName $WslName)) {
+        return $false
+    } else {
+        return $true
+    }
+}
+
+function Get-WslImage {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$WslName
+    )
+
+    Write-Output "Try to get information from WslImage $WslName"
+
+    $_image_property_string =(((wsl.exe -l -v).Replace("`0","")).trim() | ForEach-Object { if (![string]::IsNullOrEmpty($_) -and ($_ -like "*$($WslName)*")){$_out = $($_ -replace '\s+', ';'); Write-Output $_out} })
+
+    if([string]::IsNullOrEmpty($_image_property_string)) {
+        return $null
+    }
+
+    $_image_properties = New-Object -Type PSObject
+    if (($_image_property_string.Split(";")[0]) -eq "*") {
+        $_image_properties | Add-Member -MemberType NoteProperty -Name "IsDefault" -Value $True -Force
+        $_image_properties | Add-Member -MemberType NoteProperty -Name "Name" -Value $_image_property_string.Split(";")[1] -Force
+        $_image_properties | Add-Member -MemberType NoteProperty -Name "State" -Value $_image_property_string.Split(";")[2] -Force
+        $_image_properties | Add-Member -MemberType NoteProperty -Name "Version" -Value $_image_property_string.Split(";")[3] -Force
+    } else {
+        $_image_properties | Add-Member -MemberType NoteProperty -Name "IsDefault" -Value $False -Force
+        $_image_properties | Add-Member -MemberType NoteProperty -Name "Name" -Value $_image_property_string.Split(";")[0] -Force
+        $_image_properties | Add-Member -MemberType NoteProperty -Name "State" -Value $_image_property_string.Split(";")[1] -Force
+        $_image_properties | Add-Member -MemberType NoteProperty -Name "Version" -Value $_image_property_string.Split(";")[2] -Force
+    }
+
+    return $_image_properties
+}
+
+function Remove-WslImage {
+
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='None')]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$WslName
+    )
+    $PSCmdlet.ShouldProcess("dummy") | Out-Null
+
+    if(Test-WslImage -WslName $WslName) {
+        $_wslProcess=(Start-Process -FilePath "wsl.exe" -ArgumentList "--unregister $WslName" -Wait -NoNewWindow -PassThru)
+    }
+
+    if($_wslProcess.ExitCode -ne 0) {
+        throw "Failed to remove WSL instance (Returncode: $($_wslProcess.ExitCode)). Command Details: ""$Command"". Leaving."
     }
 }

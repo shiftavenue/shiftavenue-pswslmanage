@@ -8,7 +8,7 @@
     CompanyName = 'shiftavenue'
     Copyright = '(c) David Koenig. All rights reserved.'
     Description = 'With this module you can install and maintain WSL images'
-    FunctionsToExport = @("Add-WSLImage" )
+    FunctionsToExport = @("Add-WslImage", "Test-WslImage", "Get-WslImage", "Remove-WslImage" )
     CmdletsToExport = ''
     VariablesToExport = ''
     AliasesToExport = ''
