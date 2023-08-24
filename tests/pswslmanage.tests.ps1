@@ -2,9 +2,9 @@ Describe 'Common pswslmanage tests' {
     
     BeforeAll {
         try {
-
+            
             $script:_wsl_test_use_existing_image = $false
-            $script:_wsl_test_existing_suffix = "Lxq"
+            $script:_wsl_test_existing_suffix = "hjd"
             $script:_wsl_test_keep_image = $false
 
             if(!$script:_wsl_test_use_existing_image) {
@@ -15,7 +15,7 @@ Describe 'Common pswslmanage tests' {
             }
 
             # Define root path for all created objects 
-            $script:_wsl_test_base_path = "$($env:localappdata)\\shiftavenue\\pswslmanage-test-$script:_wsl_test_target_environment"
+            $script:_wsl_test_base_path = "$($env:localappdata)\shiftavenue\pswslmanage-test-$script:_wsl_test_target_environment"
 
             # The name of the target image
             $script:_wsl_test_name = "pswslmanage-test-$($script:_wsl_test_target_environment)"
@@ -33,14 +33,15 @@ Describe 'Common pswslmanage tests' {
                 Remove-Module pswslmanage -Force
             }
 
+            # Create the baseimg path (will be created by the module when it doesn't exist, but we need it for certs and other things)"
+            Write-Host "Test prerequisites: Create the baseimg path"
+            New-Item -Path "$script:_wsl_test_base_path" -Name "baseimg" -ItemType "Directory" -ErrorAction SilentlyContinue
+
             # Try to create the image locally to prevent the download from internet
-            if(Test-Path "$($env:localappdata)\\shiftavenue\\pswslmanage-test\Ubuntu2204.appx") {
-                
-                Write-Host "Test prerequisites: Create the baseimg path (will be created by the module when it doesn't exist)"
-                New-Item -Path "$script:_wsl_test_base_path" -Name "baseimg" -ItemType "Directory" -ErrorAction SilentlyContinue
+            if(Test-Path "$($env:localappdata)\\shiftavenue\pswslmanage-test\Ubuntu2204.appx") {
 
                 Write-Host "Test prerequisites: Copy image from cache into target directory"
-                Copy-Item -Path "$($env:localappdata)\\shiftavenue\\pswslmanage-test\Ubuntu2204.appx" -Destination "$script:_wsl_test_base_path\baseimg\Ubuntu2204.appx"
+                Copy-Item -Path "$($env:localappdata)\shiftavenue\pswslmanage-test\Ubuntu2204.appx" -Destination "$script:_wsl_test_base_path\baseimg\Ubuntu2204.appx"
             }
 
             # Import the module
@@ -50,7 +51,8 @@ Describe 'Common pswslmanage tests' {
                 Write-Host "Test prerequisites: Skip image creation, existing image will be used"
             } else {
 
-                ssh-keygen -b 4096 -t rsa -f $script:_wsl_test_base_path\ssh.key -q -N '""'
+                Write-Host "Test prerequisites: Create the certificate which is used for the tests"
+                ssh-keygen -b 4096 -t rsa -f $script:_wsl_test_base_path\ssh.key -q -N ''
                 $_wsl_test_ssh_key_pub = $(Get-Content -Path "$script:_wsl_test_base_path\ssh.key.pub")
 
                 Write-Host "Test prerequisites: Create the new image"
@@ -69,7 +71,7 @@ Describe 'Common pswslmanage tests' {
                                 -WslDistroName "Ubuntu2204"
             }
 
-            Write-Host "Test prerequisites: Prequisites done"
+            Write-Host "Test prerequisites: Prerequisites done"
         } catch {
             Write-Host "Test prerequisites: Failed to prepare pester tests. Details: $($_.Exception.Message)"
             throw "Exit"
@@ -77,18 +79,62 @@ Describe 'Common pswslmanage tests' {
     }
 
     It 'Check if central test-image exist' {
+        Write-Host "Test: Check if central test-image exist"
         Test-WSLImage -WslName $script:_wsl_test_name | Should -Be $true
     }
 
-    It 'Get the properties of the test-image' {
+    It 'Test shutdown against central test-image' {
+        Write-Host "Test: Test shutdown against central test-image"
+        Stop-WslImage -WslName $script:_wsl_test_name
+        (Get-WSLImage -WslName $script:_wsl_test_name).State | Should -Be "Stopped"
+    }
+
+    It 'Get the properties of the central test-image' {
+        Write-Host "Test: Get the properties of the central test-image"
         $_wsl_test_image_properties = Get-WSLImage -WslName $script:_wsl_test_name 
         $_wsl_test_image_properties.Name | Should -Be $script:_wsl_test_name
         $_wsl_test_image_properties.Version | Should -Be 2
+        $_wsl_test_image_properties.IP | Should -not -BeNullOrEmpty
+    }
+
+    It 'Test the SSH access to the central test-image' {
+        Write-Host "Test: Install SSH role to image"
+        Add-WslRoleSSH -WslName $script:_wsl_test_name -WslSSHPort "22222"
+        
+        $_wsl_test_image_properties = Get-WSLImage -WslName $script:_wsl_test_name
+        # Wake up the maschine
+        $_wsl_status_count = 1
+        $_wsl_status = "Stopped"
+        
+        Do {
+            try {
+                Write-Host "Test: Try to contact maschine via SSH ($_wsl_status_count/5)"
+                Invoke-WSLCommand -Distribution $script:_wsl_test_name -Command "ls ~ > /dev/null" -User root
+                $_ssh_wsl_key = $(ssh -q -o "StrictHostKeyChecking no" WslTestUser@$($_wsl_test_image_properties.IP) -p 22222 -i "$script:_wsl_test_base_path\ssh.key" cat /home/WslTestUser/.ssh/authorized_keys)
+                if(-Not ([string]::IsNullOrEmpty($_ssh_wsl_key))) {
+                    $_wsl_status = "OK"
+                }
+            } catch {  
+                $_wsl_status = "Stopped"
+            }
+            Start-Sleep 2
+
+            $_wsl_status_count++
+            if($_wsl_status_count -eq 6) {
+                throw "Test: WSL start timed out"
+            }
+        }
+        while ($_wsl_status -ne "OK")
+        
+        $_ssh_lcl_key = Get-Content -Path "$script:_wsl_test_base_path\ssh.key.pub"
+        $_ssh_wsl_key | Should -Be $_ssh_lcl_key
+
     }
 
     AfterAll {
         if(!$script:_wsl_test_keep_image) {
-            Remove-WslImage -WslName $script:_wsl_test_name
+            Write-Host "Test finalization: Remove the WslImage"
+            Remove-WslImage -WslName "$script:_wsl_test_name" -WslBasePath "$script:_wsl_test_base_path" -WithFile
         }
     } 
 }

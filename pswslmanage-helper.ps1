@@ -25,11 +25,20 @@ function Invoke-WSLCommand {
        throw "No command given. Leaving."
     }
 
-    $_wslProcess=(Start-Process -FilePath "wsl.exe" -ArgumentList "--distribution $Distribution --user $User -- $Command" -Wait -NoNewWindow -PassThru)
+    $_wslProcess=(Start-Process -FilePath "wsl.exe" -ArgumentList "--distribution $Distribution --user $User -- $Command" -Wait -NoNewWindow -PassThru -RedirectStandardOutput "$($env:temp)\process_output_$Distribution.out")
+
+    $_wsl_return_string = $null
+    if(Test-Path -Path "$($env:temp)\process_output_$Distribution.out") {
+        $_wsl_return_string = Get-Content -Path "$($env:temp)\process_output_$Distribution.out"
+        Remove-Item "$($env:temp)\process_output_$Distribution.out"
+    }
 
     if($_wslProcess.ExitCode -ne 0) {
         throw "Failed to execute command (Returncode: $($_wslProcess.ExitCode)). Command Details: ""$Command"". Leaving."
     }
+
+    return $_wsl_return_string
+
 }
 
 ##################################################################################

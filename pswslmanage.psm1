@@ -7,6 +7,9 @@
 ##		- You must be running Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11.
 ###############################################################################################################
 
+. $PSScriptRoot/pswslmanage-helper.ps1
+. $PSScriptRoot/pswslmanage-roles.ps1
+
 function Add-WslImage {
     <#
         .SYNOPSIS
@@ -123,8 +126,6 @@ function Add-WslImage {
         [ValidateSet("Ubuntu2004", "Ubuntu2204")]
         [string]$WslDistroName
     )
-
-    . $PSScriptRoot/pswslmanage-helper.ps1
 
     # Show header
     # Generated with https://textkool.com/en/ascii-art-generator?hl=default&vl=default&font=Standard&text=WSL
@@ -372,8 +373,9 @@ function Add-WslImage {
         Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""chmod +x /root/manage-users.sh""" -User root
 
         Write-Output "Invoke manage user command for work user"
-        $_wslBashCommand=$ExecutionContext.InvokeCommand.ExpandString("/root/manage-users.sh --username ""$_wslWorkUser"" --password ""$_wslWorkUserPwd"" --pubkey ""$_wslWorkUserSSHPubKey"" --sudoperm 1 > /dev/null 2>&1")
-        Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""$_wslBashCommand""" -User root
+        #$_wslBashCommand=$ExecutionContext.InvokeCommand.ExpandString("/root/manage-users.sh --username ""$_wslWorkUser"" --password ""$_wslWorkUserPwd"" --pubkey ""$_wslWorkUserSSHPubKey"" --sudoperm 1 > /dev/null 2>&1")
+        $_wslBashCommand='/root/manage-users.sh --username "{0}" --password "{1}" --pubkey "{2}" --sudoperm 1 > /dev/null 2>&1' -f $_wslWorkUser, $_wslWorkUserPwd, $_wslWorkUserSSHPubKey
+        Invoke-WSLCommand -Distribution $_wslName -Command "$_wslBashCommand" -User root
 
         Write-Output "Remove the user management script from WSL"
         Invoke-WSLCommand -Distribution $_wslName -Command "rm -f ""root\manage-users.sh""" -User root
@@ -461,10 +463,14 @@ function Get-WslImage {
         $_image_properties | Add-Member -MemberType NoteProperty -Name "Version" -Value $_image_property_string.Split(";")[2] -Force
     }
 
+    # Get the internet-connected IP of the WSL by trying to reach the gooogle DNS server
+    $_wsl_ip = Invoke-WSLCommand -Distribution $WslName -Command 'printf $(ip route get 8.8.8.8 | awk -F src ''{print $2}''| awk ''{print $1}'')' -User root
+    $_image_properties | Add-Member -MemberType NoteProperty -Name "IP" -Value $_wsl_ip -Force
+
     return $_image_properties
 }
 
-function Remove-WslImage {
+function Stop-WslImage {
 
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact='None')]
     [OutputType([bool])]
@@ -475,7 +481,32 @@ function Remove-WslImage {
     $PSCmdlet.ShouldProcess("dummy") | Out-Null
 
     if(Test-WslImage -WslName $WslName) {
+        $_wslProcess=(Start-Process -FilePath "wsl.exe" -ArgumentList "--shutdown $WslName" -Wait -NoNewWindow -PassThru)
+    }
+
+    if($_wslProcess.ExitCode -ne 0) {
+        throw "Failed to remove WSL instance (Returncode: $($_wslProcess.ExitCode)). Command Details: ""$Command"". Leaving."
+    }
+}
+
+function Remove-WslImage {
+
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='None')]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$WslName,
+        [string]$WslBasePath,
+        [switch]$WithFile
+    )
+    $PSCmdlet.ShouldProcess("dummy") | Out-Null
+
+    if(Test-WslImage -WslName $WslName) {
         $_wslProcess=(Start-Process -FilePath "wsl.exe" -ArgumentList "--unregister $WslName" -Wait -NoNewWindow -PassThru)
+    }
+
+    if((Test-Path -Path $WslBasePath) -and $WithFile) {
+        Remove-Item -Path $WslBasePath -Force -Recurse
     }
 
     if($_wslProcess.ExitCode -ne 0) {
