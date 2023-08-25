@@ -1,10 +1,10 @@
 ###############################################################################################################
 ## Author: 						David Koenig
 ## Date: 						2023-08-18
-## Description: 				Installs an Ubuntu WSL on your maschine
+## Description: 				Installs and manage WSL images on your maschine
 ##
 ## Prerequisites (packages):
-##		- You must be running Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11.
+##		- You must run Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11 (tested just on Windows 11).
 ###############################################################################################################
 
 . $PSScriptRoot/pswslmanage-helper.ps1
@@ -75,15 +75,15 @@ function Add-WslImage {
             Define the name of the distribution you want to install.
 
         .EXAMPLE
-            .\Add-WSLImage.ps1
+            Add-WSLImage
             Use the configuration file which is stored at $PSScriptRoot\pswslmanage.secret
 
         .EXAMPLE
-            .\Add-WSLImage.ps1 -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslWorkUser work -WslRootPwd "Start123" -WslWorkUserPwd "Start123" -WslWorkUserDefault -WslDistroName Ubuntu2204
+            Add-WSLImage -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslWorkUser work -WslRootPwd "Start123" -WslWorkUserPwd "Start123" -WslWorkUserDefault -WslDistroName Ubuntu2204
             Ignore configuration file and configure the WSL with parameters
 
         .EXAMPLE
-            .\Add-WSLImage.ps1 -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslWorkUser work -WslWorkUserPwd "Start123" -WslWorkUserDefault -WslWorkUserSSHPubKey "ssh-rsa as4f$j..." -WslSshServer -WslSshPort 30122 -WslDistroName Ubuntu2204
+            Add-WSLImage -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslWorkUser work -WslWorkUserPwd "Start123" -WslWorkUserDefault -WslWorkUserSSHPubKey "ssh-rsa as4f$j..." -WslSshServer -WslSshPort 30122 -WslDistroName Ubuntu2204
             Ignore configuration file and configure the WSL with parameters
     #>
 
@@ -419,14 +419,27 @@ function Add-WslImage {
 }
 
 function Test-WslImage {
+
+    <#
+        .SYNOPSIS
+            Test if a WSL image exist.
+
+        .DESCRIPTION
+            Test if a WSL image exist, will return bool.
+
+        .PARAMETER WslName
+            The name of the WSL-image you want to test for.
+
+        .EXAMPLE
+            Test-WSLImage -WslName shiftavenue-ci
+    #>
+
     [CmdletBinding()]
     [OutputType([bool])]
     param(
         [Parameter(Mandatory=$true)]
         [string]$WslName
     )
-
-    . $PSScriptRoot/pswslmanage-helper.ps1
 
     if($null -eq (Get-WslImage -WslName $WslName)) {
         return $false
@@ -436,6 +449,21 @@ function Test-WslImage {
 }
 
 function Get-WslImage {
+
+    <#
+        .SYNOPSIS
+            Get the properties of a WSL image.
+
+        .DESCRIPTION
+            Get the properties of a WSL image. Is enhanced by additional properties like the IP address.
+
+        .PARAMETER WslName
+            The name of the WSL-image you want to get the properties for.
+
+        .EXAMPLE
+            Get-WSLImage -WslName shiftavenue-ci
+    #>
+
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
@@ -443,7 +471,6 @@ function Get-WslImage {
     )
 
     Write-Output "Try to get information from WslImage $WslName"
-
     $_image_property_string =(((wsl.exe -l -v).Replace("`0","")).trim() | ForEach-Object { if (![string]::IsNullOrEmpty($_) -and ($_ -like "*$($WslName)*")){$_out = $($_ -replace '\s+', ';'); Write-Output $_out} })
 
     if([string]::IsNullOrEmpty($_image_property_string)) {
@@ -464,6 +491,7 @@ function Get-WslImage {
     }
 
     # Get the internet-connected IP of the WSL by trying to reach the gooogle DNS server
+    Write-Output "Read out the IP address of the WSL"
     $_wsl_ip = Invoke-WSLCommand -Distribution $WslName -Command 'printf $(ip route get 8.8.8.8 | awk -F src ''{print $2}''| awk ''{print $1}'')' -User root
     $_image_properties | Add-Member -MemberType NoteProperty -Name "IP" -Value $_wsl_ip -Force
 
@@ -471,6 +499,20 @@ function Get-WslImage {
 }
 
 function Stop-WslImage {
+
+    <#
+        .SYNOPSIS
+            Stop a running WSL image.
+
+        .DESCRIPTION
+            Stop a running WSL image.
+
+        .PARAMETER WslName
+            The name of the WSL-image you want to stop
+
+        .EXAMPLE
+            Stop-WSLImage -WslName shiftavenue-ci
+    #>
 
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact='None')]
     [OutputType([bool])]
@@ -481,6 +523,7 @@ function Stop-WslImage {
     $PSCmdlet.ShouldProcess("dummy") | Out-Null
 
     if(Test-WslImage -WslName $WslName) {
+        Write-Output "Shutdown the WSL image"
         $_wslProcess=(Start-Process -FilePath "wsl.exe" -ArgumentList "--shutdown $WslName" -Wait -NoNewWindow -PassThru)
     }
 
@@ -490,6 +533,26 @@ function Stop-WslImage {
 }
 
 function Remove-WslImage {
+
+    <#
+        .SYNOPSIS
+            Remove a WSL image.
+
+        .DESCRIPTION
+            Remove a WSL image. Let you choose to remove the binary files of the image as well.
+
+        .PARAMETER WslName
+            The name of the WSL-image you want to remove.
+
+        .PARAMETER WslBasePath
+            The base path where the image files are stored. Will search in "${env:localappdata}\shiftavenue\wsl\<WslName>" when no path is given.
+
+        .PARAMETER WithFile
+            Will delete the binary files of the WSL images as well.
+
+        .EXAMPLE
+            Remove-WSLImage -WslName shiftavenue-ci
+    #>
 
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact='None')]
     [OutputType([bool])]
@@ -501,11 +564,18 @@ function Remove-WslImage {
     )
     $PSCmdlet.ShouldProcess("dummy") | Out-Null
 
+    if([string]::IsNullOrEmpty($WslBasePath)) {
+        Write-Output "Set base path to default"
+        $WslBasePath="${env:localappdata}\shiftavenue\wsl\$WslName"
+    }
+
     if(Test-WslImage -WslName $WslName) {
+        Write-Output "Unregister WSL"
         $_wslProcess=(Start-Process -FilePath "wsl.exe" -ArgumentList "--unregister $WslName" -Wait -NoNewWindow -PassThru)
     }
 
     if((Test-Path -Path $WslBasePath) -and $WithFile) {
+        Write-Output "Delete binary files"
         Remove-Item -Path $WslBasePath -Force -Recurse
     }
 

@@ -1,5 +1,21 @@
 function Add-WslRoleSSH {
     
+    <#
+        .SYNOPSIS
+            Add the SSH daemon to an existing WSL image.
+
+        .DESCRIPTION
+            Add the SSH daemon to an existing WSL image.
+
+        .PARAMETER WslName
+            The name of the WSL-image you want to remove.
+
+        .PARAMETER WslSSHPort
+            The port where the SSH daemon is listening to.
+        .EXAMPLE
+            Add-WslRoleSSH -WslName shiftavenue-ci -WslSSHPort 22222
+    #>
+
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$true)]
@@ -26,8 +42,8 @@ function Add-WslRoleSSH {
     Invoke-WSLCommand -Distribution $WslName -Command 'bash -c "echo ""AcceptEnv LANG LC_*"" >> /etc/ssh/sshd_config"' -User root
     Invoke-WSLCommand -Distribution $WslName -Command 'bash -c "echo ""Subsystem sftp /usr/lib/openssh/sftp-server"" >> /etc/ssh/sshd_config"' -User root
 
-    #TODO: Here we add statically the boot section. Better to check if section exist
-    # Add the start of cron to the boot section to keep the wsl image running
+    #TODO: Here i added statically the boot section. Better to check if section exist
+    # Added the start of cron to the boot section to keep the wsl image running
     Write-Output "Add SSH to the boot parameter"
     Invoke-WSLCommand -Distribution $WslName -Command 'bash -c "echo ""[boot]"" >> /etc/wsl.conf"' -User root
     Invoke-WSLCommand -Distribution $WslName -Command 'bash -c ''echo "command=service cron start; service ssh start" >> /etc/wsl.conf''' -User root

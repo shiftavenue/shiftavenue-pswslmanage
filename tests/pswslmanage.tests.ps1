@@ -3,9 +3,10 @@ Describe 'Common pswslmanage tests' {
     BeforeAll {
         try {
             
-            $script:_wsl_test_use_existing_image = $false
-            $script:_wsl_test_existing_suffix = "hjd"
-            $script:_wsl_test_keep_image = $false
+            # The following thre parameters are just for development and can be ignored.
+            $script:_wsl_test_use_existing_image = $false   # Default: false
+            $script:_wsl_test_existing_suffix = "hjd"       # Default: empty
+            $script:_wsl_test_keep_image = $false           # Default: false
 
             if(!$script:_wsl_test_use_existing_image) {
                 # Create a random name used for the test-image and directories
