@@ -80,3 +80,7 @@ The available values are:
 Its not very simple to add SSH to a WSL image, but for some scenarios its really useful to have that available. With the "Add-WslRoleSSH" it is totally easy to do that, just by executing the following command.  
 
 ```Add-WslRoleSSH -WslName shiftavenue-ci -WslSSHPort 22222```
+
+## Ideas / Backlog
+
+Please use [GH issue tracker](https://github.com/shiftavenue/shiftavenue-pswslmanage/issues) of this repository.
