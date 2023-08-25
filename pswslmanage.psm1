@@ -35,8 +35,6 @@ function Add-WslImage {
                 "wslMgmtUser":"ansible",
                 "wslMgmtUserPwd":"Start123",
                 "wslMgmtUserSSHPubKey":"5j43tz098t988jv98wh875hzgtiuh7843578trh...98uh= ansible",
-                "wslSshServer":1,
-                "wslSshServerPort":30122,
                 "wslDistroName":"Ubuntu2204"
             }
 
@@ -53,24 +51,6 @@ function Add-WslImage {
         .PARAMETER WslRootPwd
             The root password.
 
-        .PARAMETER WslWorkUser
-            A user which you can use for daily work.
-
-        .PARAMETER WslWorkUserPwd
-            The password for the work user.
-
-        .PARAMETER WslWorkUserDefault
-            If set, the work user will get the default user of the WSL.
-
-        .PARAMETER WslWorkUserSSHPubKey
-            The SSH key for the work user.
-
-        .PARAMETER WslSshServer
-            Decide to install a SSH server.
-
-        .PARAMETER WslSshServerPort
-            Define the SSH server port.
-
         .PARAMETER WslDistroName
             Define the name of the distribution you want to install.
 
@@ -83,7 +63,7 @@ function Add-WslImage {
             Ignore configuration file and configure the WSL with parameters
 
         .EXAMPLE
-            Add-WSLImage -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslWorkUser work -WslWorkUserPwd "Start123" -WslWorkUserDefault -WslWorkUserSSHPubKey "ssh-rsa as4f$j..." -WslSshServer -WslSshPort 30122 -WslDistroName Ubuntu2204
+            Add-WSLImage -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslWorkUser work -WslWorkUserPwd "Start123" -WslWorkUserDefault -WslWorkUserSSHPubKey "ssh-rsa as4f$j..." -WslDistroName Ubuntu2204
             Ignore configuration file and configure the WSL with parameters
     #>
 
@@ -105,24 +85,6 @@ function Add-WslImage {
         [string]$WslRootPwd = "Start123",
 
         [Parameter(Mandatory=$false)]
-        [string]$WslWorkUser = "work",
-
-        [Parameter(Mandatory=$false)]
-        [string]$WslWorkUserPwd = "Start123",
-
-        [Parameter(Mandatory=$false)]
-        [string]$WslWorkUserSSHPubKey = "dummy",
-
-        [Parameter(Mandatory=$false)]
-        [switch]$WslWorkUserDefault,
-
-        [Parameter(Mandatory=$false)]
-        [switch]$WslSshServer,
-
-        [Parameter(Mandatory=$false)]
-        [int]$WslSshServerPort,
-
-        [Parameter(Mandatory=$false)]
         [ValidateSet("Ubuntu2004", "Ubuntu2204")]
         [string]$WslDistroName
     )
@@ -141,7 +103,6 @@ function Add-WslImage {
     ##################################################################################
     $_wslDistroPath = "distros"
     $_wslBaseImagePath = "baseimg"
-    $_wslManageUserScript = "$PSScriptRoot/pswslmanage-create-linux-user.sh"
     $_wslJson = $null
     $_wslMinMajorVersion = 5
     $_wslMinMinorVersion = 10
@@ -173,12 +134,6 @@ function Add-WslImage {
         [string]$_wslName = $WslName
         [bool]$_wslRemoveExisting = $WslRemoveExisting
         [string]$_wslRootPwd = $WslRootPwd
-        [string]$_wslWorkUser = $WslWorkUser
-        [bool]$_wslWorkUserDefault = $WslWorkUserDefault
-        [string]$_wslWorkUserPwd = $WslWorkUserPwd
-        [string]$_wslWorkUserSSHPubKey = $WslWorkUserSSHPubKey
-        [string]$_wslSshServer = $WslSshServer
-        [int]$_wslSshServerPort = $WslSshServerPort
         [string]$_wslDistroUniqueName = $WslDistroName
     } else {
         Write-Output "Found configuration file in ""$WslConfigPath"""
@@ -187,12 +142,6 @@ function Add-WslImage {
         [string]$_wslName = $_wslJson.wslName
         [bool]$_wslRemoveExisting = $_wslJson.wslRemoveExisting
         [string]$_wslRootPwd = $_wslJson.wslRootPwd
-        [string]$_wslWorkUser = $_wslJson.wslWorkUser
-        [bool]$_wslWorkUserDefault = $_wslJson.wslWorkUserDefault
-        [string]$_wslWorkUserPwd = $_wslJson.wslWorkUserPwd
-        [string]$_wslWorkUserSSHPubKey = $_wslJson.wslWorkUserSSHPubKey
-        [string]$_wslSshServer = $_wslJson.wslSshServer
-        [int]$_wslSshServerPort = $_wslJson.wslSshServerPort
         [string]$_wslDistroUniqueName = $_wslJson.wslDistroName
     }
 
@@ -259,12 +208,8 @@ function Add-WslImage {
     Write-Output "Sub folder for caching distribution files: $_wslBaseImagePath"
     Write-Output "Name for the wsl image:                    $_wslName"
     Write-Output "Remove existing wsl image:                 $_wslRemoveExisting"
-    Write-Output "Work user:                                 $_wslWorkUser"
-    Write-Output "Set work user as default:                  $_wslWorkUserDefault"
     Write-Output "Linux kernel version:                      $_wslKernelMajor.$_wslKernelMinor"
     Write-Output "WSL image exist:                           $_wslImageExist"
-    Write-Output "Install a SSH server:                      $_wslSshServer"
-    Write-Output "SSH server port:                           $_wslSshServerPort"
     Write-Output "The WSL image which should be installed:   $_wslDistroUniqueName"
 
     #######################################################
@@ -325,7 +270,6 @@ function Add-WslImage {
         #######################################################
         # Create the distribution
         #######################################################
-        # Thats a bit tricky, because wsl print some null values you have to remove before comparing the string
 
         Write-Output "WSL instance ""${_wslName}"" not found. Create it."
         if (-Not (Test-Path -Path "$_wslBasePath\$_wslDistroPath")) {
@@ -365,37 +309,6 @@ function Add-WslImage {
     Write-Output "Set root password"
     Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""sudo echo root:$_wslRootPwd | chpasswd""" -User root
 
-    if((-Not [string]::IsNullOrEmpty($_wslWorkUser))) {
-        Write-Output "Create user for daily work"
-
-        Write-Output "Copy script to manage users"
-        Copy-WSLFileToTarget -Distribution $_wslName -LocalPath "$_wslManageUserScript" -TargetPath "/root/manage-users.sh" -User root
-        Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""chmod +x /root/manage-users.sh""" -User root
-
-        Write-Output "Invoke manage user command for work user"
-        #$_wslBashCommand=$ExecutionContext.InvokeCommand.ExpandString("/root/manage-users.sh --username ""$_wslWorkUser"" --password ""$_wslWorkUserPwd"" --pubkey ""$_wslWorkUserSSHPubKey"" --sudoperm 1 > /dev/null 2>&1")
-        $_wslBashCommand='/root/manage-users.sh --username "{0}" --password "{1}" --pubkey "{2}" --sudoperm 1 > /dev/null 2>&1' -f $_wslWorkUser, $_wslWorkUserPwd, $_wslWorkUserSSHPubKey
-        Invoke-WSLCommand -Distribution $_wslName -Command "$_wslBashCommand" -User root
-
-        Write-Output "Remove the user management script from WSL"
-        Invoke-WSLCommand -Distribution $_wslName -Command "rm -f ""root\manage-users.sh""" -User root
-
-        Write-Output "Reset wsl-conf"
-        $_wslInstallationDate=$(Get-Date -Format 'yyyy-mm-dd_HH:MM:ss')
-        Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""echo ""[info]"" > /etc/wsl.conf""" -User root
-        Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""echo ""changedate=$_wslInstallationDate"" >> /etc/wsl.conf""" -User root
-
-        Write-Output "Set hostname to wsl name"
-        Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""echo ""[network]"" >> /etc/wsl.conf""" -User root
-        Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""echo ""hostname=$_wslName"" >> /etc/wsl.conf""" -User root
-
-        if($_wslWorkUserDefault) {
-            Write-Output "Make work user the default user"
-            Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""echo ""[user]"" >> /etc/wsl.conf""" -User root
-            Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""echo ""default=$_wslWorkUser"" >> /etc/wsl.conf""" -User root
-        }
-    }
-
     #######################################################
     # Finalize
     #######################################################
@@ -406,12 +319,7 @@ function Add-WslImage {
     $_wslName = ""
     $_wslRemoveExisting = $False
     $_wslRootPwd = ""
-    $_wslWorkUser = ""
-    $_wslWorkUserPwd = ""
-    $_wslWorkUserSSHPubKey = ""
 
-    Write-Output "Shutdown WSL"
-    wsl --shutdown --distribution $_wslName
     $_wslCmdReturn=$?
     if($_wslCmdReturn -ne $True) {
         throw "Failed to import. Leaving."
@@ -552,6 +460,9 @@ function Remove-WslImage {
 
         .EXAMPLE
             Remove-WSLImage -WslName shiftavenue-ci
+
+        .EXAMPLE
+            Remove-WSLImage -WslName shiftavenue-ci -WslBasePath c:\temp\shiftavenue\wsl-temp-maschine -WithFile
     #>
 
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact='None')]
@@ -581,5 +492,109 @@ function Remove-WslImage {
 
     if($_wslProcess.ExitCode -ne 0) {
         throw "Failed to remove WSL instance (Returncode: $($_wslProcess.ExitCode)). Command Details: ""$Command"". Leaving."
+    }
+}
+
+function Add-WslUser {
+
+    <#
+        .SYNOPSIS
+            Add a user to the WSL image.
+
+        .DESCRIPTION
+            Add a user to the WSL image and let you specify the basic credentials.
+
+        .PARAMETER WslName
+            The name of the WSL-image you want to add the user to.
+
+        .PARAMETER WslUser
+            A user which you can use for daily work.
+
+        .PARAMETER WslUserPwd
+            The password of the user you want to add. Must be set, when WslUserSudo=true.
+
+        .PARAMETER WslUserSSHPubKey
+            The public key of the user you want to add.
+
+        .PARAMETER WslUserDefault
+            If set, the user will get the default user of the WSL. Thsi measn, if you jist enter the WSL with "wsl.exe -d <your-wsl>" the user
+            will be selected automatically.
+
+        .PARAMETER WslUserSudo
+            If set the user will get sudo permissions.
+
+        .PARAMETER WslUserSudoNoPwd
+            If the the user must not enter his password for sudo permission. Will set WslUserSudo automatically to true. Handle with care.
+
+        .EXAMPLE
+            Create a user with a SSH-public key.
+            Add-WslUser -WslName shiftavenue-ci -WslUser work -WslUserPwd "Start123" -WslUserSSHPubKey "ssh-rsa AAAds5pIke...."
+
+        .EXAMPLE
+            Create a user with a SSH-public key, give sudo permissions and set as default.
+            Add-WslUser -WslName shiftavenue-ci -WslUser work -WslUserPwd "Start123" -WslUserSudo -WslUserSSHPubKey "ssh-rsa AAAds5pIke...." -WslUserDefault
+
+        .EXAMPLE
+            Create a user with a SSH-public key, give sudo permissions without the need to enter a password.
+            Add-WslUser -WslName shiftavenue-ci -WslUser work -WslUserPwd "Start123" -WslUserSudoNoPwd -WslUserSSHPubKey "ssh-rsa AAAds5pIke...."
+    #>
+
+    [CmdletBinding()]
+    param (
+
+        [Parameter(Mandatory=$true)]
+        [string]$WslName,
+
+        [Parameter(Mandatory=$true)]
+        [string]$WslUser,
+
+        [Parameter(Mandatory=$false)]
+        [string]$WslUserPwd,
+
+        [Parameter(Mandatory=$false)]
+        [string]$WslUserSSHPubKey,
+
+        [switch]$WslUserDefault,
+
+        [switch]$WslUserSudo,
+
+        [switch]$WslUserSudoNoPwd
+    )
+
+    if($WslUserSudoNoPwd) {
+        $WslUserSudo = $true
+    }
+
+    if($WslUserSudo -and ([string]::IsNullOrEmpty($WslUserPwd))) {
+        throw "A password must be given, when user should get sudo permissions."
+    }
+
+    $_wslManageUserScript = "$PSScriptRoot/pswslmanage-create-linux-user.sh"
+
+    Write-Output "Copy script to manage linux users"
+    Copy-WSLFileToTarget -Distribution $WslName -LocalPath "$_wslManageUserScript" -TargetPath "/root/manage-users.sh" -User root
+    Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""chmod +x /root/manage-users.sh""" -User root
+
+    Write-Output "Invoke manage user command for work user"
+    $_wslBashCommand='/root/manage-users.sh --username "{0}" --password "{1}" --pubkey "{2}" --sudoperm {3} --sudonopwd {4} > /dev/null 2>&1' -f $WslUser, $WslUserPwd, $WslUserSSHPubKey, $([int][bool]::Parse($WslUserSudo)), $([int][bool]::Parse($WslUserSudoNoPwd))
+    Invoke-WSLCommand -Distribution $WslName -Command "$_wslBashCommand" -User root
+
+    Write-Output "Remove the user management script from WSL"
+    Invoke-WSLCommand -Distribution $WslName -Command "rm -f ""/root/manage-users.sh""" -User root
+
+    Write-Output "Reset wsl-conf"
+    $_wslInstallationDate=$(Get-Date -Format 'yyyy-mm-dd_HH:MM:ss')
+    Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""[info]"" > /etc/wsl.conf""" -User root
+    Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""changedate=$_wslInstallationDate"" >> /etc/wsl.conf""" -User root
+
+    Write-Output "Set hostname to wsl name"
+    Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""[network]"" >> /etc/wsl.conf""" -User root
+    Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""hostname=$WslName"" >> /etc/wsl.conf""" -User root
+
+    # TODO: Here i add statically the user section which ignores that the section probably exist.
+    if($WslUserDefault) {
+        Write-Output "Make work user the default user"
+        Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""[user]"" >> /etc/wsl.conf""" -User root
+        Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""default=$WslUser"" >> /etc/wsl.conf""" -User root
     }
 }

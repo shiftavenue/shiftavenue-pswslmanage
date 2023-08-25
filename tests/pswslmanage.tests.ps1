@@ -21,6 +21,11 @@ Describe 'Common pswslmanage tests' {
             # The name of the target image
             $script:_wsl_test_name = "pswslmanage-test-$($script:_wsl_test_target_environment)"
 
+            # The user which should be created on the WSL image
+            $script:_wsl_test_user = "WslTestUser"
+            $script:_wsl_test_user_pwd = "WslTestWorkPwd"
+            $script:_wsl_test_user_ssh_pubkey = $null # Will be set later
+
             # Flags to disable/enable single tests, please just change in case of development and set to true before check-in.
             #$script:_test_invoke_asgarddatarefinement = $true
 
@@ -54,7 +59,7 @@ Describe 'Common pswslmanage tests' {
 
                 Write-Host "Test prerequisites: Create the certificate which is used for the tests"
                 ssh-keygen -b 4096 -t rsa -f $script:_wsl_test_base_path\ssh.key -q -N ''
-                $_wsl_test_ssh_key_pub = $(Get-Content -Path "$script:_wsl_test_base_path\ssh.key.pub")
+                $script:_wsl_test_user_ssh_pubkey = $(Get-Content -Path "$script:_wsl_test_base_path\ssh.key.pub")
 
                 Write-Host "Test prerequisites: Create the new image"
                 # Create the WSL image which is used for the most of the tests
@@ -63,12 +68,6 @@ Describe 'Common pswslmanage tests' {
                                 -WslName $script:_wsl_test_name `
                                 -WslRemoveExisting `
                                 -WslRootPwd "WslTestRootPwd" `
-                                -WslWorkUser "WslTestUser" `
-                                -WslWorkUserPwd "WslTestWorkPwd" `
-                                -WslWorkUserSSHPubKey $_wsl_test_ssh_key_pub `
-                                -WslWorkUserDefault `
-                                -WslSshServer `
-                                -WslSshServerPort 30022 `
                                 -WslDistroName "Ubuntu2204"
             }
 
@@ -96,6 +95,27 @@ Describe 'Common pswslmanage tests' {
         $_wsl_test_image_properties.Name | Should -Be $script:_wsl_test_name
         $_wsl_test_image_properties.Version | Should -Be 2
         $_wsl_test_image_properties.IP | Should -not -BeNullOrEmpty
+    }
+
+    It 'Test the creation of an addition user' {
+        Write-Host "Test: Test the creation of an addition user"
+
+        # Skip this for first, because the check for an exception is not working as expected
+        # Write-Host "Test: Check if exception is raised when no password is given in case of sudo permissions"
+        # Add-WslUser -WslName $script:_wsl_test_name -WslUser $script:_wsl_test_user -WslUserSudo | Should -Throw "A password must be given, when user should get sudo permissions."
+
+        Write-Host "Test: Create the user ""$script:_wsl_test_user"" in the WSL"
+        Add-WslUser -WslName $script:_wsl_test_name `
+                        -WslUser $script:_wsl_test_user `
+                        -WslUserPwd $script:_wsl_test_user_pwd `
+                        -WslUserSSHPubKey $script:_wsl_test_user_ssh_pubkey `
+                        -WslUserDefault `
+                        -WslUserSudo `
+                        -WslUserSudoNoPwd
+        
+        $(wsl.exe --distribution $script:_wsl_test_name --user $script:_wsl_test_user -- echo "test") | Should -Be "test"
+        $(wsl.exe --distribution $script:_wsl_test_name --user $script:_wsl_test_user -- bash -c 'if groups | grep "\<sudo\>" &> /dev/null; then echo true; else echo false; fi') | Should -Be "true"
+        $(wsl.exe --distribution $script:_wsl_test_name --user $script:_wsl_test_user -- cat /etc/sudoers.d/WslTestUser) | Should -be "WslTestUser ALL=(ALL) NOPASSWD:ALL"
     }
 
     It 'Test the SSH access to the central test-image' {

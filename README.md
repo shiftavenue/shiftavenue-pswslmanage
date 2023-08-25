@@ -8,24 +8,25 @@ The following functionality is implemented and is done automatically by the modu
 
 - Store every configuration detail in a JSON file to recreate WSL images repeatably.
 - System update (update and upgrade) will done automatically.
-- A default work user will be created.
-- The ```wsl.conf``` will be configured.
+- You can create users with a simple function in the WSL.
+- SSL role with all needed settings can be added.
+- The ```wsl.conf``` will be configured for you automatically.
 
 ## Examples
 
-### Install with parameters
+### Create a WSL system with parameters
 
-You can run the script just with input parameter
+You can run the script just with input parameter. Please execute ```Get-Help Add-WSLImage``` to get further details.
 
 ```powershell
 
-.\Add-WSLImage.ps1 -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslWorkUser work -WslWorkUserPwd "Start123" -WslWorkUserDefault -WslWorkUserSSHPubKey "ssh-rsa as4fj..." -WslSshServer -WslSshPort 30122 -WslDistroName Ubuntu2204 Ignore configuration file and configure the WSL with parameters
+.\Add-WSLImage.ps1 -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslDistroName Ubuntu2204 Ignore configuration file and configure the WSL with parameters
 
 ```
 
-### Install with config file
+### Create a WSL system with a config file
 
-Create the following configuration file in c:\temp\wsl.secret
+Create the following configuration file in c:\temp\wsl.secret. Please execute ```Get-Help Add-WSLImage``` to get further details.
 
 ```json
 
@@ -35,15 +36,6 @@ Create the following configuration file in c:\temp\wsl.secret
     "wslName":"shiftavenue-ci",
     "wslRemoveExisting":1,
     "wslRootPwd":"Start123",
-    "wslWorkUser":"Work",
-    "wslWorkUserDefault":1,
-    "wslWorkUserPwd":"Start123",
-    "wslWorkUserSSHPubKey":"dummy",
-    "wslMgmtUser":"ansible",
-    "wslMgmtUserPwd":"Start123",
-    "wslMgmtUserSSHPubKey":"5j43tz098t988jv98wh875hzgtiuh7843578trh...98uh= ansible",
-    "wslSshServer":1,
-    "wslSshServerPort":30122,
     "wslDistroName":"Ubuntu2204"
 }
 ```
@@ -52,9 +44,39 @@ Execute the following command:
 
 ```powershell
 
-.\Add-WSLImage.ps1 -WslConfigPath ""
+.\Add-WSLImage -WslConfigPath "c:\temp\wsl.secret"
 ```
 
-### More details
+### Check if image exist
 
-Please execute ```Get-Help Add-WSLImage.ps1``` to get further details
+Just call ```Test-WslImage -WslName shiftavenue-ci``` to know if the image exist.
+
+### Stop image
+
+Just call ```Stop-WslImage -WslName shiftavenue-ci``` to stop a running machine.
+
+### Remove image
+
+The command ```Remove-WslImage -WslName shiftavenue-ci``` will remove the WSL like the ```--unregister``` switch of the wsl.exe will do. With the optional parameters "WslBasePath" and "WithFile" you can also remove all related binary files.
+Example:
+
+```Remove-WSLImage -WslName shiftavenue-ci -WslBasePath c:\temp\shiftavenue\wsl-temp-maschine -WithFile```
+
+### Get information from WSL
+
+The information you get from the wsl.exe are very basic. Use the following command to get more and have powershell compatible way to access the properties.
+
+```Get-WslImage -WslName shiftavenue-ci```
+
+The available values are:
+
+- Name
+- Version
+- IP
+- State
+  
+### Add the SSH damon to an existing WSL
+
+Its not very simple to add SSH to a WSL image, but for some scenarios its really useful to have that available. With the "Add-WslRoleSSH" it is totally easy to do that, just by executing the following command.  
+
+```Add-WslRoleSSH -WslName shiftavenue-ci -WslSSHPort 22222```

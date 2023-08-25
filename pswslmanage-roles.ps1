@@ -48,7 +48,7 @@ function Add-WslRoleSSH {
     Invoke-WSLCommand -Distribution $WslName -Command 'bash -c "echo ""[boot]"" >> /etc/wsl.conf"' -User root
     Invoke-WSLCommand -Distribution $WslName -Command 'bash -c ''echo "command=service cron start; service ssh start" >> /etc/wsl.conf''' -User root
 
-    Write-Host "Restart the image"
+    Write-Output "Restart the image"
     Stop-WslImage -WslName $WslName
     Invoke-WSLCommand -Distribution $WslName -Command 'ls ~ > /dev/null' -User root
     
