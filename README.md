@@ -5,6 +5,7 @@
 - [PS WSL Manage](#ps-wsl-manage)
   - [Table of contents](#table-of-contents)
   - [Description](#description)
+  - [Supported OS](#supported-os)
   - [Why to use this module](#why-to-use-this-module)
   - [Installation](#installation)
   - [Examples](#examples)
@@ -21,6 +22,15 @@
 ## Description
 
 This module can be used to manage local WSL images. It enhance the default functionality of local ```wsl.exe``` and will be used as base for further enhancements.
+
+## Supported OS
+
+This script is tested on Windows 11 22H2.
+
+Current supported OSe are
+
+- Ubuntu 22.04 (tested)
+- Ubuntu 20.04 (Not tested)
 
 ## Why to use this module
 
@@ -39,6 +49,13 @@ PsWslManage is published to the Powershell Gallery and can be installed as follo
 ```Install-Module PsWslManage```
 
 ## Examples
+
+The central function is "Add-WslImage" which allows you to create a WSL image.
+
+Additionally to the OS itself, the following tools will be installed:
+
+- OS udpate
+- crudini (for INI file modification)
 
 ### Create a WSL system with parameters
 

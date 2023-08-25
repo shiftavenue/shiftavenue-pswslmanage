@@ -303,11 +303,29 @@ function Add-WslImage {
     Invoke-WSLCommand -Distribution $_wslName -Command "sudo apt autoremove -y > /dev/null 2>&1" -User root
 
     #######################################################
+    # Add additional software
+    #######################################################
+
+    Invoke-WSLCommand -Distribution $_wslName -Command "sudo apt install crudini -y > /dev/null 2>&1" -User root
+
+    #######################################################
     # Manage the users in WSL image
     #######################################################
 
     Write-Output "Set root password"
     Invoke-WSLCommand -Distribution $_wslName -Command "bash -c ""sudo echo root:$_wslRootPwd | chpasswd""" -User root
+
+    #######################################################
+    # Configure the wsl.conf
+    #######################################################
+    Write-Output "Reset wsl-conf"
+    $_wslInstallationDate=$(Get-Date -Format 'yyyy-mm-dd_HH:MM:ss')
+    Invoke-WSLCommand -Distribution $WslName -Command "crudini --set /etc/wsl.conf info" -User root
+    Invoke-WSLCommand -Distribution $WslName -Command "crudini --set /etc/wsl.conf info created $_wslInstallationDate" -User root
+
+    Write-Output "Set hostname to wsl name"
+    Invoke-WSLCommand -Distribution $WslName -Command "crudini --set /etc/wsl.conf network" -User root
+    Invoke-WSLCommand -Distribution $WslName -Command "crudini --set /etc/wsl.conf network hostname $WslName" -User root
 
     #######################################################
     # Finalize
@@ -397,6 +415,8 @@ function Get-WslImage {
         $_image_properties | Add-Member -MemberType NoteProperty -Name "State" -Value $_image_property_string.Split(";")[1] -Force
         $_image_properties | Add-Member -MemberType NoteProperty -Name "Version" -Value $_image_property_string.Split(";")[2] -Force
     }
+
+    #TODO: Idea: Get the primary from wsl.conf 
 
     # Get the internet-connected IP of the WSL by trying to reach the gooogle DNS server
     Write-Output "Read out the IP address of the WSL"
@@ -582,19 +602,9 @@ function Add-WslUser {
     Write-Output "Remove the user management script from WSL"
     Invoke-WSLCommand -Distribution $WslName -Command "rm -f ""/root/manage-users.sh""" -User root
 
-    Write-Output "Reset wsl-conf"
-    $_wslInstallationDate=$(Get-Date -Format 'yyyy-mm-dd_HH:MM:ss')
-    Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""[info]"" > /etc/wsl.conf""" -User root
-    Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""changedate=$_wslInstallationDate"" >> /etc/wsl.conf""" -User root
-
-    Write-Output "Set hostname to wsl name"
-    Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""[network]"" >> /etc/wsl.conf""" -User root
-    Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""hostname=$WslName"" >> /etc/wsl.conf""" -User root
-
-    # TODO: Here i add statically the user section which ignores that the section probably exist.
     if($WslUserDefault) {
         Write-Output "Make work user the default user"
-        Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""[user]"" >> /etc/wsl.conf""" -User root
-        Invoke-WSLCommand -Distribution $WslName -Command "bash -c ""echo ""default=$WslUser"" >> /etc/wsl.conf""" -User root
+        Invoke-WSLCommand -Distribution $WslName -Command "crudini --set /etc/wsl.conf user" -User root
+        Invoke-WSLCommand -Distribution $WslName -Command "crudini --set /etc/wsl.conf user default $WslUser" -User root
     }
 }

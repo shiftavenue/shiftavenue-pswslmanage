@@ -42,11 +42,10 @@ function Add-WslRoleSSH {
     Invoke-WSLCommand -Distribution $WslName -Command 'bash -c "echo ""AcceptEnv LANG LC_*"" >> /etc/ssh/sshd_config"' -User root
     Invoke-WSLCommand -Distribution $WslName -Command 'bash -c "echo ""Subsystem sftp /usr/lib/openssh/sftp-server"" >> /etc/ssh/sshd_config"' -User root
 
-    #TODO: Here i added statically the boot section. Better to check if section exist
     # Added the start of cron to the boot section to keep the wsl image running
     Write-Output "Add SSH to the boot parameter"
-    Invoke-WSLCommand -Distribution $WslName -Command 'bash -c "echo ""[boot]"" >> /etc/wsl.conf"' -User root
-    Invoke-WSLCommand -Distribution $WslName -Command 'bash -c ''echo "command=service cron start; service ssh start" >> /etc/wsl.conf''' -User root
+    Invoke-WSLCommand -Distribution $WslName -Command 'crudini --set /etc/wsl.conf boot' -User root
+    Invoke-WSLCommand -Distribution $WslName -Command 'crudini --set /etc/wsl.conf boot command "service cron start; service ssh start"' -User root
 
     Write-Output "Restart the image"
     Stop-WslImage -WslName $WslName
