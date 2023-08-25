@@ -1,5 +1,25 @@
 # PS WSL Manage
 
+## Table of contents
+
+- [PS WSL Manage](#ps-wsl-manage)
+  - [Table of contents](#table-of-contents)
+  - [Description](#description)
+  - [Why to use this module](#why-to-use-this-module)
+  - [Installation](#installation)
+  - [Examples](#examples)
+    - [Create a WSL system with parameters](#create-a-wsl-system-with-parameters)
+    - [Create a WSL system with a config file](#create-a-wsl-system-with-a-config-file)
+    - [Check if image exist](#check-if-image-exist)
+    - [Stop image](#stop-image)
+    - [Remove image](#remove-image)
+    - [Get information from WSL](#get-information-from-wsl)
+    - [Add the SSH damon to an existing WSL](#add-the-ssh-damon-to-an-existing-wsl)
+  - [Ideas / Backlog](#ideas--backlog)
+  - [Authors / Contributors](#authors--contributors)
+
+## Description
+
 This module can be used to manage local WSL images. It enhance the default functionality of local ```wsl.exe``` and will be used as base for further enhancements.
 
 ## Why to use this module
@@ -11,6 +31,12 @@ The following functionality is implemented and is done automatically by the modu
 - You can create users with a simple function in the WSL.
 - SSL role with all needed settings can be added.
 - The ```wsl.conf``` will be configured for you automatically.
+
+## Installation
+
+PsWslManage is published to the Powershell Gallery and can be installed as follows:
+
+```Install-Module PsWslManage```
 
 ## Examples
 
@@ -84,3 +110,7 @@ Its not very simple to add SSH to a WSL image, but for some scenarios its really
 ## Ideas / Backlog
 
 Please use [GH issue tracker](https://github.com/shiftavenue/shiftavenue-pswslmanage/issues) of this repository.
+
+## Authors / Contributors
+
+- [David Koenig](https://github.com/davidkoenig-shiftavenue)
