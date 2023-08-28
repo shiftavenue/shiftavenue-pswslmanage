@@ -63,7 +63,7 @@ You can run the script just with input parameter. Please execute ```Get-Help Add
 
 ```powershell
 
-.\Add-WSLImage.ps1 -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslDistroName Ubuntu2204 Ignore configuration file and configure the WSL with parameters
+.\Add-WSLImage -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslDistroName Ubuntu2204 
 
 ```
 
