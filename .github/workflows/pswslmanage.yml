@@ -13,6 +13,6 @@ jobs:
       
       - name: Run powershell linter again valid module files
         run: |
-          Invoke-ScriptAnalyzer "${{ vars.GITHUB_ACTION_PATH }}\pswslmanage.psm1"
-          Invoke-ScriptAnalyzer "${{ vars.GITHUB_ACTION_PATH }}\pswslmanage-roles.ps1"
-          Invoke-ScriptAnalyzer "${{ vars.GITHUB_ACTION_PATH }}\pswslmanage-helper.ps1"
+          Invoke-ScriptAnalyzer "${{ vars.GITHUB_WORKSPACE }}\pswslmanage.psm1"
+          Invoke-ScriptAnalyzer "${{ vars.GITHUB_WORKSPACE }}\pswslmanage-roles.ps1"
+          Invoke-ScriptAnalyzer "${{ vars.GITHUB_WORKSPACE }}\pswslmanage-helper.ps1"
