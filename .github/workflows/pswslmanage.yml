@@ -9,7 +9,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       
-      - name: Run powershell linter
+      - name: Run powershell linter again valid module files
         run: |
           Invoke-ScriptAnalyzer "$PSScriptRoot\pswslmanage.psm1"
           Invoke-ScriptAnalyzer "$PSScriptRoot\pswslmanage-roles.ps1"
