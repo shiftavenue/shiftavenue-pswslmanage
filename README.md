@@ -1,6 +1,6 @@
 # PS WSL Manage
 
-- Status of DEV branch: [![pswslmanage](https://github.com/shiftavenue/shiftavenue-pswslmanage/actions/workflows/dev.yml/badge.svg)](https://github.com/shiftavenue/shiftavenue-pswslmanage/actions/workflows/dev.yml)
+- Status of DEV branch: ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/shiftavenue/shiftavenue-pswslmanage/dev.yaml)
 
 ## Table of contents
 
