@@ -1,5 +1,5 @@
 function Add-WslRoleSSH {
-    
+
     <#
         .SYNOPSIS
             Add the SSH daemon to an existing WSL image.
@@ -50,5 +50,5 @@ function Add-WslRoleSSH {
     Write-Output "Restart the image"
     Stop-WslImage -WslName $WslName
     Invoke-WSLCommand -Distribution $WslName -Command 'ls ~ > /dev/null' -User root
-    
+
 }

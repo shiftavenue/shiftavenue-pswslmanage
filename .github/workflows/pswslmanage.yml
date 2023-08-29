@@ -13,7 +13,7 @@ jobs:
       
       - name: Run powershell linter again valid module files
         run: |
-          Invoke-ScriptAnalyzer "${{ github.workspace }}\pswslmanage.psm1"
-          Invoke-ScriptAnalyzer "${{ github.workspace }}\pswslmanage-roles.ps1"
-          Invoke-ScriptAnalyzer "${{ github.workspace }}\pswslmanage-helper.ps1"
+          if(Invoke-ScriptAnalyzer "${{ github.workspace }}\pswslmanage.psm1") { exit 1}
+          if(Invoke-ScriptAnalyzer "${{ github.workspace }}\pswslmanage-roles.ps1") { exit 1}
+          if(Invoke-ScriptAnalyzer "${{ github.workspace }}\pswslmanage-helper.ps1") { exit 1}
         
