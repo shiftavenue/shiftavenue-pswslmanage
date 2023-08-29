@@ -4,7 +4,7 @@ on: push
 jobs:
   pwslmanage:
     name: pswslmanage
-    runs-on: [sa-ci-win]
+    runs-on: [self-hosted]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
