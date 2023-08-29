@@ -13,7 +13,8 @@ jobs:
       
       - name: Run powershell linter again valid module files
         run: |
-          if(Invoke-ScriptAnalyzer "${{ github.workspace }}\pswslmanage.psm1") { exit 1}
-          if(Invoke-ScriptAnalyzer "${{ github.workspace }}\pswslmanage-roles.ps1") { exit 1}
-          if(Invoke-ScriptAnalyzer "${{ github.workspace }}\pswslmanage-helper.ps1") { exit 1}
-        
+          $_issue_list=@()
+          foreach($_issue in $(Invoke-ScriptAnalyzer .\pswslmanage.psm1)) {$_issue_list += $_issue}
+          foreach($_issue in $(Invoke-ScriptAnalyzer .\pswslmanage-roles.ps1)) {$_issue_list += $_issue}
+          foreach($_issue in $(Invoke-ScriptAnalyzer .\pswslmanage-helper.ps1)) {$_issue_list += $_issue}
+          if($_issue_list.Count -gt 0) {$_issue_list; Write-Error "Linter issues found. Exiting"} 
