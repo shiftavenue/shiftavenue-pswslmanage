@@ -9,8 +9,8 @@ do
 		--username) echo "Username set ($2)" >> "/tmp/create-linux-user.log"; _username="$2"; shift;;
 		--password) echo "Password set (********)" >> "/tmp/create-linux-user.log"; _password="$2"; shift;;
 		--pubkey) echo "Pubkey set ($2)" >> "/tmp/create-linux-user.log"; _pubkey="$2"; shift;;
-		--sudoperm) echo "Sudo set ($2)" >> "/tmp/create-linux-user.log"; _sudo=1; shift;;
-		--sudonopwd) echo "SudoNoPwd set ($2)" >> "/tmp/create-linux-user.log"; _sudonopwd=1; shift;;
+		--sudoperm) echo "Sudo set ($2)" >> "/tmp/create-linux-user.log"; _sudo=$2; shift;;
+		--sudonopwd) echo "SudoNoPwd set ($2)" >> "/tmp/create-linux-user.log"; _sudonopwd=$2; shift;;
 		*) echo "finished";;
 	esac
 	shift

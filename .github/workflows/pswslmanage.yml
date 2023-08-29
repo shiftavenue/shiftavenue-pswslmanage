@@ -1,0 +1,16 @@
+---
+name: pswslmanage
+on: push
+jobs:
+  pwslmanage:
+    name: pswslmanage
+    runs-on: [sa-ci-win]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Run powershell linter
+        run: |
+          Invoke-ScriptAnalyzer "$PSScriptRoot\pswslmanage.psm1"
+          Invoke-ScriptAnalyzer "$PSScriptRoot\pswslmanage-roles.ps1"
+          Invoke-ScriptAnalyzer "$PSScriptRoot\pswslmanage-helper.ps1"
