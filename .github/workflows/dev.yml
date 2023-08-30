@@ -19,6 +19,10 @@ jobs:
       
       - name: PSScriptAnalyzer
         run: |
+          echo "-------------"
+          echo $GH_WORKDIR
+          echo ${{ runner.temp }}
+          echo "-------------"
           $_issue_list=$null
           $_issue_list=@()
           foreach($_issue in $(Invoke-ScriptAnalyzer $GH_WORKDIR\pswslmanage.psm1)) {Write-Output "Add issue"; $_issue_list += $_issue}
