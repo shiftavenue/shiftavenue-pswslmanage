@@ -20,7 +20,8 @@ jobs:
       - name: PSScriptAnalyzer
         run: |
           echo "-------------"
-          echo ${{ vars.GITHUB_WORKSPACE }}
+          echo "${{ vars.GITHUB_WORKSPACE }} - foobar"
+          echo "$GH_WORKDIR - foobar"
           echo "-------------"
           $_issue_list=$null
           $_issue_list=@()
@@ -29,7 +30,7 @@ jobs:
           foreach($_issue in $(Invoke-ScriptAnalyzer ${{ runner.temp }}\pswslmanage-helper.ps1)) {Write-Output "Add issue"; $_issue_list += $_issue}
           if($_issue_list.Count -gt 0) {$_issue_list; Write-Error "Linter issues found. Exiting"} 
         env:
-          GH_WORKDIR: ${{ runner.temp }}
+          GH_WORKDIR: "testabc"
 
       - name: Publish
         run: |
