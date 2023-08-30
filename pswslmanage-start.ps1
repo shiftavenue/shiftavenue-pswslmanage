@@ -11,6 +11,9 @@ try {
         # Check scripts against Script-analyzer
         if (-Not (Get-Module PSScriptAnalyzer)) { Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser }
         Invoke-ScriptAnalyzer "$PSScriptRoot\pswslmanage.psm1"
+        Invoke-ScriptAnalyzer "$PSScriptRoot\pswslmanage-helper.ps1"
+        Invoke-ScriptAnalyzer "$PSScriptRoot\pswslmanage-roles.ps1"
+
     }
     
     if($RunTests) {

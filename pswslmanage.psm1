@@ -416,7 +416,7 @@ function Get-WslImage {
         $_image_properties | Add-Member -MemberType NoteProperty -Name "Version" -Value $_image_property_string.Split(";")[2] -Force
     }
 
-    #TODO: Idea: Get the primary from wsl.conf 
+    #TODO: Idea: Get the primary from wsl.conf
 
     # Get the internet-connected IP of the WSL by trying to reach the gooogle DNS server
     Write-Output "Read out the IP address of the WSL"

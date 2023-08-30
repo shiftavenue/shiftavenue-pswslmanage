@@ -8,7 +8,7 @@
 ###############################################################################################################
 
 #######################################################
-# Function to invoke a command against the WSL 
+# Function to invoke a command against the WSL
 #######################################################
 function Invoke-WSLCommand {
     param(
@@ -51,7 +51,7 @@ function Convert-WSLPath {
 
     # Replace all backslashes with forward slashes
     $WSLPath=$LocalPath.Replace('\', '/')
-    
+
     # Extract driveletter
     if($WSLPath.Substring(0,3) -like "?:/") { $_driveLetter=$WSLPath.Substring(0,1).ToLower() }
 
