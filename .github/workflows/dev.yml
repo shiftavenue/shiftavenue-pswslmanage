@@ -56,10 +56,10 @@ jobs:
           echo "repo_name:   $_repo_name"
           echo "-----------------"
 
-          ## Force TLS1.2
+          Write-Output "Force TLS1.2"
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           
-          ## Register repository
+          Write-Output "Register repository
           $_args = @{
               Name = $_repo_name
               SourceLocation = $_feed
@@ -68,9 +68,13 @@ jobs:
               Credential = $_creds
           }
 
+          Write-Output "Remove PS Repo"
           if(Get-PSRepository -Name SAPSGallery -ErrorAction SilentlyContinue) {Unregister-PSRepository -Name $_repo_name}
+          
+          Write-Output "Register Repo"
           Register-PSRepository @_args
           
+          Write-Output "Publish Module"
           Publish-Module -Path $_repo_dir `
             -Repository $_repo_name `
             -NuGetApiKey "${{ github.token }}"
