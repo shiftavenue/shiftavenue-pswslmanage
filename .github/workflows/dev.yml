@@ -43,7 +43,7 @@ jobs:
           $_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token)
           $_feed = "https://nuget.pkg.github.com/$_repo_owner/index.json"
           $_module_name = "pswslmanage"
-          $_repo_name = "PowershellNugetServices"
+          $_repo_name = "SAPSGallery"
           
           echo "-----------------"
           echo "repo_dir:    $_repo_dir"
@@ -68,7 +68,7 @@ jobs:
               Credential = $_creds
           }
 
-          Unregister-PSRepository -Name $_repo_name
+          if(Get-PSRepository -Name SAPSGallery -ErrorAction SilentlyContinue) {Unregister-PSRepository -Name $_repo_name}
           Register-PSRepository @_args
           
           Publish-Module -Path $_repo_dir `
