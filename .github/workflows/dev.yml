@@ -39,7 +39,7 @@ jobs:
           $_repo_dir = "{0}\shiftavenue-pswslmanage" -f $($env:RUNNER_WORKSPACE)
           $_user = "${{ github.actor }}"
           $_token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText -Force
-          $_repo_owner = ${{ github.repository_owner }}
+          $_repo_owner = "${{ github.repository_owner }}""
           $_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token)
           $_feed = "https://nuget.pkg.github.com/$_repo_owner/index.json"
           $_module_name = "pswslmanage"
