@@ -24,14 +24,13 @@ jobs:
       - name: PSScriptAnalyzer
         run: |
           echo "-------------"
-          echo "${{ vars.GITHUB_WORKSPACE }} - foobar"
-          echo "$GH_WORKDIR - foobar"
+          echo "$($env:RUNNER_WORKSPACE) - foobar"
           echo "-------------"
           $_issue_list=$null
           $_issue_list=@()
-          foreach($_issue in $(Invoke-ScriptAnalyzer ${{ runner.temp }}\pswslmanage.psm1)) {Write-Output "Add issue"; $_issue_list += $_issue}
-          foreach($_issue in $(Invoke-ScriptAnalyzer ${{ runner.temp }}\pswslmanage-roles.ps1)) {Write-Output "Add issue"; $_issue_list += $_issue}
-          foreach($_issue in $(Invoke-ScriptAnalyzer ${{ runner.temp }}\pswslmanage-helper.ps1)) {Write-Output "Add issue"; $_issue_list += $_issue}
+          foreach($_issue in $(Invoke-ScriptAnalyzer $($env:RUNNER_WORKSPACE)\shiftavenue-pwslmanage\pswslmanage.psm1)) {Write-Output "Add issue"; $_issue_list += $_issue}
+          foreach($_issue in $(Invoke-ScriptAnalyzer $($env:RUNNER_WORKSPACE)\shiftavenue-pwslmanage\pswslmanage-roles.ps1)) {Write-Output "Add issue"; $_issue_list += $_issue}
+          foreach($_issue in $(Invoke-ScriptAnalyzer $($env:RUNNER_WORKSPACE)\shiftavenue-pwslmanage\pswslmanage-helper.ps1)) {Write-Output "Add issue"; $_issue_list += $_issue}
           if($_issue_list.Count -gt 0) {$_issue_list; Write-Error "Linter issues found. Exiting"} 
         env:
           GH_WORKDIR: "testabc"
