@@ -23,14 +23,13 @@ jobs:
 
       - name: PSScriptAnalyzer
         run: |
-          echo "-------------"
-          echo "$($env:RUNNER_WORKSPACE) - foobar"
-          echo "-------------"
+          $_repo_dir = "{0}\shiftavenue-pswslmanage" -f $($env:RUNNER_WORKSPACE)
           $_issue_list=$null
           $_issue_list=@()
-          foreach($_issue in $(Invoke-ScriptAnalyzer $($env:RUNNER_WORKSPACE)\shiftavenue-pwslmanage\pswslmanage.psm1)) {Write-Output "Add issue"; $_issue_list += $_issue}
-          foreach($_issue in $(Invoke-ScriptAnalyzer $($env:RUNNER_WORKSPACE)\shiftavenue-pwslmanage\pswslmanage-roles.ps1)) {Write-Output "Add issue"; $_issue_list += $_issue}
-          foreach($_issue in $(Invoke-ScriptAnalyzer $($env:RUNNER_WORKSPACE)\shiftavenue-pwslmanage\pswslmanage-helper.ps1)) {Write-Output "Add issue"; $_issue_list += $_issue}
+          echo $_repo_dir
+          foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage.psm1")) {Write-Output "Add issue"; $_issue_list += $_issue}
+          foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-roles.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
+          foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-helper.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
           if($_issue_list.Count -gt 0) {$_issue_list; Write-Error "Linter issues found. Exiting"} 
         env:
           GH_WORKDIR: "testabc"
