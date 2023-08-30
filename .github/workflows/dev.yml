@@ -36,16 +36,26 @@ jobs:
 
       - name: Publish
         run: |
+          $_repo_dir = "{0}\shiftavenue-pswslmanage" -f $($env:RUNNER_WORKSPACE)
           $_user = "${{ github.actor }}"
           $_token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText -Force
+          $_repo_owner = ${{ github.repository_owner }}
           $_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token)
-          $_feed = "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+          $_feed = "https://nuget.pkg.github.com/$_repo_owner/index.json"
           $_module_name = "pswslmanage"
           $_repository_name = "PowershellNugetServices"
           
-          $_drop_path = "${{ runner.temp }}"
-          $_module_path = [System.IO.Path]::GetFullPath((Join-Path -Path $_drop_path -ChildPath $_module_name))
-          
+          echo "-----------------"
+          echo $_repo_dir
+          echo $_user
+          echo $_token
+          echo $_repo_owner
+          echo $_creds
+          echo $_feed
+          echo $_module_name
+          echo $_repository_name
+          echo "-----------------"
+
           ## Force TLS1.2
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           
@@ -60,7 +70,7 @@ jobs:
           
           Register-PSRepository @_args
           
-          Publish-Module -Path $_module_path `
+          Publish-Module -Path $_repo_dir `
             -Repository $_repository_name `
             -NuGetApiKey "${{ github.token }}"
   
