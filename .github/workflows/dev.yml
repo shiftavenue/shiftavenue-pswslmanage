@@ -43,17 +43,17 @@ jobs:
           $_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token)
           $_feed = "https://nuget.pkg.github.com/$_repo_owner/index.json"
           $_module_name = "pswslmanage"
-          $_repository_name = "PowershellNugetServices"
+          $_repo_name = "PowershellNugetServices"
           
           echo "-----------------"
-          echo $_repo_dir
-          echo $_user
-          echo $_token
-          echo $_repo_owner
-          echo $_creds
-          echo $_feed
-          echo $_module_name
-          echo $_repository_name
+          echo "repo_dir:    $_repo_dir"
+          echo "user:        $_user"
+          echo "token:       $_token"
+          echo "repo_owner:  $_repo_owner"
+          echo "creds:       $_creds"
+          echo "feeds:       $_feed"
+          echo "module_name: $_module_name"
+          echo "repo_name:   $_repo_name"
           echo "-----------------"
 
           ## Force TLS1.2
@@ -61,16 +61,17 @@ jobs:
           
           ## Register repository
           $_args = @{
-              Name = $_repository_name
+              Name = $_repo_name
               SourceLocation = $_feed
               PublishLocation = $_feed
               InstallationPolicy = 'Trusted'
               Credential = $_creds
           }
-          
-          Register-PSRepository @_args
+
+          Unregister-PSRepository -Name $_repo_name
+          Register-PSRepository @_args -
           
           Publish-Module -Path $_repo_dir `
-            -Repository $_repository_name `
+            -Repository $_repo_name `
             -NuGetApiKey "${{ github.token }}"
   
