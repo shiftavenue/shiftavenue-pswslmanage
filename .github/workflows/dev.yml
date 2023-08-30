@@ -18,7 +18,8 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Print all variables
-        run: env
+        run: |
+          dir env:
 
       - name: PSScriptAnalyzer
         run: |
