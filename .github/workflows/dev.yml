@@ -69,7 +69,7 @@ jobs:
           }
 
           Unregister-PSRepository -Name $_repo_name
-          Register-PSRepository @_args -
+          Register-PSRepository @_args
           
           Publish-Module -Path $_repo_dir `
             -Repository $_repo_name `
