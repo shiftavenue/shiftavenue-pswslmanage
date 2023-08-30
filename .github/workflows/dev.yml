@@ -25,7 +25,7 @@ jobs:
           foreach($_issue in $(Invoke-ScriptAnalyzer $GH_WORKDIR\pswslmanage-roles.ps1)) {Write-Output "Add issue"; $_issue_list += $_issue}
           foreach($_issue in $(Invoke-ScriptAnalyzer GH_WORKDIR\pswslmanage-helper.ps1)) {Write-Output "Add issue"; $_issue_list += $_issue}
           if($_issue_list.Count -gt 0) {$_issue_list; Write-Error "Linter issues found. Exiting"} 
-        with:
+        env:
           GH_WORKDIR: ${{ runner.temp }}
 
       - name: Publish
