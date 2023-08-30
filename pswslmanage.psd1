@@ -6,7 +6,7 @@
     GUID = 'a2d16567-94f2-4a76-8e0d-c29d40177c56'
     Author = 'David Koenig'
     CompanyName = 'shiftavenue'
-    Copyright = '(c) David Koenig. All rights reserved.'
+    Copyright = '(c) shiftavenue. All rights reserved.'
     Description = 'With this module you can install and maintain WSL images'
     FunctionsToExport = @("Add-WslImage", "Test-WslImage", "Get-WslImage", "Remove-WslImage", "Stop-WslImage", "Add-WslUser", "Add-WslRoleSSH" )
     CmdletsToExport = ''

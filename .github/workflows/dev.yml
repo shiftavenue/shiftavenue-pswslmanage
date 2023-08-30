@@ -1,24 +1,61 @@
 ---
 name: pswslmanage
 on: 
-  pull_request:
-    branches:
-      - dev
+  push:
+  # pull_request:
+  #   branches:
+  #     - dev
 
 jobs:
   pwslmanage:
     name: pswslmanage
     runs-on: [self-hosted]
+    permissions:
+      actions: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           path: repo_pswslmanage
       
-      - name: Run powershell linter again valid module files
+      - name: PSScriptAnalyzer
         run: |
           $_issue_list=@()
           foreach($_issue in $(Invoke-ScriptAnalyzer .\pswslmanage.psm1)) {$_issue_list += $_issue}
           foreach($_issue in $(Invoke-ScriptAnalyzer .\pswslmanage-roles.ps1)) {$_issue_list += $_issue}
           foreach($_issue in $(Invoke-ScriptAnalyzer .\pswslmanage-helper.ps1)) {$_issue_list += $_issue}
           if($_issue_list.Count -gt 0) {$_issue_list; Write-Error "Linter issues found. Exiting"} 
+
+          #New-ModuleManifest -Path "C:\Users\david\Documents\Development\shiftavenue\shiftavenue-pswslmanage\pswslmanage_test.psd1" -ModuleVersion "1.0.0" -Author "David Koenig" -Guid "a2d16567-94f2-4a76-8e0d-c29d40177c56" -CompanyName "shiftavenu" -Copyright "(c) shiftavenue. All rights reserved." -RootModule "pswslmanage.psm1" -Description "With this module you can install and maintain WSL images" -ProcessorArchitecture Amd64 -FunctionsToExport @("Add-WslImage", "Test-WslImage", "Get-WslImage", "Remove-WslImage", "Stop-WslImage", "Add-WslUser", "Add-WslRoleSSH" ) -CompatiblePSEditions Core -Tags "wsl, windows, linux, wsl2, windows subsystem for linux" -ProjectUri "https://github.com/shiftavenue/shiftavenue-pswslmanage" -IconUri "https://raw.githubusercontent.com/shiftavenue/shiftavenue-pswslmanage/main/Icon.png"
+
+      - name: Publish
+        run: |
+          $_user = "${{ github.actor }}"
+          $_token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText -Force
+          $_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token)
+          $_feed = "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+          $_module_name = "pswslmanage"
+          $_repository_name = "PowershellNugetServices"
+          
+          $_drop_path = "${{ runner.temp }}"
+          $_module_path = [System.IO.Path]::GetFullPath((Join-Path -Path $_drop_path -ChildPath $_module_name))
+          
+          ## Force TLS1.2
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          
+          ## Register repository
+          $_args = @{
+              Name = $_repository_name
+              SourceLocation = $_feed
+              PublishLocation = $_feed
+              InstallationPolicy = 'Trusted'
+              Credential = $_creds
+          }
+          
+          Register-PSRepository @_args
+          
+          Publish-Module -Path $_module_path `
+            -Repository $_repository_name `
+            -NuGetApiKey "${{ github.token }}"
+  

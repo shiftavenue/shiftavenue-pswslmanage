@@ -10,3 +10,4 @@ debug.log
 
 # Secret files 
 .secret
+*_test.*
