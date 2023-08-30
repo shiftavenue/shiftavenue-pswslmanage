@@ -20,8 +20,7 @@ jobs:
       - name: PSScriptAnalyzer
         run: |
           echo "-------------"
-          echo $GH_WORKDIR
-          echo ${{ runner.temp }}
+          echo ${{ vars.GITHUB_WORKSPACE }}
           echo "-------------"
           $_issue_list=$null
           $_issue_list=@()
