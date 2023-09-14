@@ -39,6 +39,7 @@ jobs:
         run: |
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
           echo "Working directory for publishing: $_repo_dir"
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
           Publish-Module -Path $_repo_dir -Repository SAPSGallery -NuGetApiKey ${{ secrets.GITHUB_TOKEN }}
 
 #           # original link: https://geoffodonnell.github.io/how-to/github-workflow-publish-powershell-module/
