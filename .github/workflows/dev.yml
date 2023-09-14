@@ -29,7 +29,6 @@ jobs:
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
           ls $($env:RUNNER_WORKSPACE)
           ls $_repo_dir
-          ls $_repo_dir\pswslmanage
           $_issue_list=$null
           $_issue_list=@()
           echo "Working directory for script analyzer: $_repo_dir"
