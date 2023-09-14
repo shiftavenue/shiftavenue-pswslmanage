@@ -19,11 +19,6 @@ jobs:
         with:
           path: ./pswslmanage
 
-
-      - name: Print all variables
-        run: |
-          dir env:
-
       - name: PSScriptAnalyzer
         run: |
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
@@ -34,6 +29,17 @@ jobs:
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-roles.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-helper.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
           if($_issue_list.Count -gt 0) {$_issue_list; Write-Error "Linter issues found. Exiting"} 
+
+      - name: Disable TLS 1.3
+        run: |
+          New-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -Force | Out-Null
+          New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null
+          New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -name 'DisabledByDefault' -value 1 -PropertyType 'DWord' -Force | Out-Null
+          New-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -Force | Out-Null
+          New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null
+          New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -name 'DisabledByDefault' -value 1 -PropertyType 'DWord' -Force | Out-Null
+          New-ItemProperty -path 'HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 | Out-Null
+          New-ItemProperty -path 'HKLM:\SOFTWARE\Wow64232Node\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 | Out-Null
 
       - name: Publish
         run: |
