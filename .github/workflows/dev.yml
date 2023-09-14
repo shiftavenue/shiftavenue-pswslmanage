@@ -43,7 +43,7 @@ jobs:
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           Publish-Module -Path $_repo_dir -Repository SAPSGallery -NuGetApiKey ${{ secrets.GITHUB_TOKEN }}
 
-#           # original link: https://geoffodonnell.github.io/how-to/github-workflow-publish-powershell-module/
+#           # original link: https://geoffodonnell.github.io/how-to/github-workflow-publish-powershell-module/ 
 
 #           $_repo_dir = "{0}\shiftavenue-pswslmanage" -f $($env:RUNNER_WORKSPACE)
 #           $_user = "${{ github.actor }}"
