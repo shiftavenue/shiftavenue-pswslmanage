@@ -26,8 +26,8 @@ jobs:
 
       - name: PSScriptAnalyzer
         run: |
-          $_repo_dir = "{0}" -f $($env:RUNNER_WORKSPACE)\pswslmanage
-          ls $_repo_dir = "{0}" -f $($env:RUNNER_WORKSPACE)
+          $_repo_dir = "{0}\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+          ls $_repo_dir
           $_issue_list=$null
           $_issue_list=@()
           echo "Working directory for script analyzer: $_repo_dir"
@@ -38,7 +38,7 @@ jobs:
 
       - name: Publish
         run: |
-          $_repo_dir = "{0}" -f $($env:RUNNER_WORKSPACE)
+          $_repo_dir = "{0}\pswslmanage" -f $($env:RUNNER_WORKSPACE)
           echo "Working directory for publishing: $_repo_dir"
           Publish-Module -Path $_repo_dir -Repository SAPSGallery -NuGetApiKey ${{ secrets.GITHUB_TOKEN }}
 
