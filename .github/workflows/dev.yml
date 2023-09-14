@@ -27,6 +27,7 @@ jobs:
       - name: PSScriptAnalyzer
         run: |
           $_repo_dir = "{0}\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+          ls $($env:RUNNER_WORKSPACE)
           ls $_repo_dir
           $_issue_list=$null
           $_issue_list=@()
