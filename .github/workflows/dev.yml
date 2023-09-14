@@ -40,7 +40,7 @@ jobs:
 
       - name: Publish
         run: |
-          $_repo_dir = "{0}\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+          $_repo_dir = "{0}\shiftavenue-pswslmanage" -f $($env:RUNNER_WORKSPACE)
           echo "Working directory for publishing: $_repo_dir"
           Publish-Module -Path $_repo_dir -Repository SAPSGallery -NuGetApiKey ${{ secrets.GITHUB_TOKEN }}
 
