@@ -45,8 +45,8 @@ jobs:
       - name: Download newest version of nuget
         run: |
           $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet\nuget.exe" -f $($env:LOCALAPPDATA)
+          echo "Download nuget to $_local_nuget_path"
           Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path"
-
 
       - name: Publish
         run: |
