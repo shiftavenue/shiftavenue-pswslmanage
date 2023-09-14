@@ -55,7 +55,8 @@ jobs:
           echo "Working directory for publishing: $_repo_dir"
           #[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          Publish-Module -Path "$_repo_dir" -Repository "SAPSGallery" -NuGetApiKey "$($env:GH_TOKEN)"
+          echo "$($env:GH_TOKEN)" >> c:\temp\test.txt
+          Publish-Module -Path "$_repo_dir" -Repository "SAPSGallery" -NuGetApiKey "$($env:GH_TOKEN)" -Verbose
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
