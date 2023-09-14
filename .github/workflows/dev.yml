@@ -26,7 +26,7 @@ jobs:
 
       - name: PSScriptAnalyzer
         run: |
-          $_repo_dir = "{0}\shiftavenue-pswslmanage" -f $($env:RUNNER_WORKSPACE)
+          $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
           ls $($env:RUNNER_WORKSPACE)
           ls $_repo_dir
           ls $_repo_dir\pswslmanage
