@@ -50,11 +50,28 @@ jobs:
 
       - name: Publish
         run: |
+          $_repo_name = "SAPSGallery"
+          $_repo_owner = "shiftavenue"
+          $_feed = "https://nuget.pkg.github.com/$_repo_owner/index.json"
+          $_user = "github"
+          $_token = "$($env:GH_TOKEN)" | ConvertTo-SecureString -AsPlainText -Force
+          $_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token)
+          $_module_name = "pswslmanage"
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+
+          echo "-----------------"
+          echo "repo_name:   $_repo_name"
+          echo "repo_owner:  $_repo_owner"
+          echo "feeds:       $_feed"
+          echo "user:        $_user"
+          echo "repo_dir:    $_repo_dir"
+          echo "module_name: $_module_name"
+          echo "repo_dir":   $_repo_dir
+          echo "-----------------"
+
           echo "Working directory for publishing: $_repo_dir"
-          #[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          echo "$($env:GH_TOKEN)" >> c:\temp\test.txt
+          Register-PSRepository -Name $_repo_name -SourceLocation $_feed -PublishLocation $_feed -InstallationPolicy 'Trusted' -Credential $_creds -Verbose
           Publish-Module -Path "$_repo_dir" -Repository "SAPSGallery" -NuGetApiKey "$($env:GH_TOKEN)" -Verbose
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -105,14 +122,6 @@ jobs:
 #           Write-Output "Publish Module"
 #           Publish-Module -Path $_repo_dir -Repository $_repo_name -NuGetApiKey "${{ github.token }}"
   
-$_repo_name = "SAPSGallery"
-$_repo_owner = "shiftavenue"
-$_feed = "https://nuget.pkg.github.com/$_repo_owner/index.json"
-$_user = "davidkoenig-shiftavenue"
-$_token = "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" | ConvertTo-SecureString -AsPlainText -Force
-$_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token)
-$_module_name = "pswslmanage"
-$_repo_dir="C:\Users\david\Documents\Development\shiftavenue\pswslmanage"
 
 # if(Get-PSRepository -Name $_repo_name -ErrorAction SilentlyContinue) {Unregister-PSRepository -Name $_repo_name}
 
