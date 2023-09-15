@@ -1,5 +1,5 @@
 ---
-name: init
+name: sa-ci-init
 on: 
   workflow_dispatch:
 
