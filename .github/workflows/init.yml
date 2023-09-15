@@ -7,11 +7,7 @@ jobs:
   sa-ci-init:
     name: sa-ci-init
     runs-on: [self-hosted]
-    permissions:
-      actions: read
-      packages: write
     steps:
-
       - name: Install PSScriptAnalyzer
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
