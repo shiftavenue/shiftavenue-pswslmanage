@@ -26,6 +26,7 @@
     - [Get information from WSL](#get-information-from-wsl)
     - [Add the SSH damon to an existing WSL](#add-the-ssh-damon-to-an-existing-wsl)
   - [Ideas / Backlog](#ideas--backlog)
+  - [CI/CD](#cicd)
   - [Authors / Contributors](#authors--contributors)
 
 ## Description
@@ -35,11 +36,6 @@ This module can be used to manage local WSL images. It enhance the default funct
 ## Supported OS
 
 This script is tested on Windows 11 22H2.
-
-Current supported OSe are
-
-- Ubuntu 22.04 (tested)
-- Ubuntu 20.04 (Not tested)
 
 ## Why to use this module
 
@@ -81,7 +77,6 @@ You can run the script just with input parameter. Please execute ```Get-Help Add
 Create the following configuration file in c:\temp\wsl.secret. Please execute ```Get-Help Add-WSLImage``` to get further details.
 
 ```json
-
 {
     "wslBasePath":"${env:localappdata}\\shiftavenue\\wsl",
     "wslDistroPath":"distros",
@@ -95,7 +90,6 @@ Create the following configuration file in c:\temp\wsl.secret. Please execute ``
 Execute the following command:
 
 ```powershell
-
 .\Add-WSLImage -WslConfigPath "c:\temp\wsl.secret"
 ```
 
@@ -136,6 +130,10 @@ Its not very simple to add SSH to a WSL image, but for some scenarios its really
 ## Ideas / Backlog
 
 Please use [GH issue tracker](https://github.com/shiftavenue/shiftavenue-pswslmanage/issues) of this repository.
+
+## CI/CD
+
+This is build and deployed witha  GitHub CI/CD workflow. Please follow [this](./docs/ci/README.md) guideline to learn how to configure the workflow.
 
 ## Authors / Contributors
 

@@ -19,6 +19,11 @@ jobs:
         with:
           path: ./pswslmanage
 
+      - name: Install PSScriptAnalyzer
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module PSScriptAnalyzer -ErrorAction Stop
+
       - name: PSScriptAnalyzer
         run: |
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
@@ -106,14 +111,14 @@ jobs:
 #           Write-Output "Publish Module"
 #           Publish-Module -Path $_repo_dir -Repository $_repo_name -NuGetApiKey "${{ github.token }}"
   
-# $_repo_name = "SAPSGallery"
-# $_repo_owner = "shiftavenue"
-# $_feed = "https://nuget.pkg.github.com/$_repo_owner/index.json"
-# $_user = "davidkoenig-shiftavenue"
-# $_token = "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" | ConvertTo-SecureString -AsPlainText -Force
-# $_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token)
-# $_module_name = "pswslmanage"
-# $_repo_dir="C:\Users\david\Documents\Development\shiftavenue\pswslmanage"
+$_repo_name = "SAPSGallery"
+$_repo_owner = "shiftavenue"
+$_feed = "https://nuget.pkg.github.com/$_repo_owner/index.json"
+$_user = "davidkoenig-shiftavenue"
+$_token = "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" | ConvertTo-SecureString -AsPlainText -Force
+$_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token)
+$_module_name = "pswslmanage"
+$_repo_dir="C:\Users\david\Documents\Development\shiftavenue\pswslmanage"
 
 # if(Get-PSRepository -Name $_repo_name -ErrorAction SilentlyContinue) {Unregister-PSRepository -Name $_repo_name}
 
