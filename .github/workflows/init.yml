@@ -25,6 +25,6 @@ jobs:
 
       - name: Download newest version of nuget
         run: |
-          $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet\nuget.exe" -f $($env:PROGRAMDATA)
-          echo "Download nuget to $_local_nuget_path"
-          if(-Not (Test-Path -Path $_local_nuget_path)) { Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path" }
+          $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet" -f $($env:PROGRAMDATA)
+          if (-Not (Test-Path -Path $_local_nuget_path)) {New-Item -Path $_local_nuget_path -ItemType Directory -Force}
+          if(-Not (Test-Path -Path $_local_nuget_path)) { Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path\nuget.exe" }
