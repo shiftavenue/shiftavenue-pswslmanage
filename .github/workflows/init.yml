@@ -1,7 +1,7 @@
 ---
 name: sa-ci-init
 on: 
-  workflow_dispatch:
+  push:
 
 jobs:
   sa-ci-init:
