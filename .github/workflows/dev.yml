@@ -64,74 +64,17 @@ jobs:
           echo "repo_owner:  $_repo_owner"
           echo "feeds:       $_feed"
           echo "user:        $_user"
-          echo "repo_dir:    $_repo_dir"
           echo "module_name: $_module_name"
-          echo "repo_dir":   $_repo_dir
+          echo "repo_dir:   $_repo_dir"
           echo "-----------------"
 
-          echo "Working directory for publishing: $_repo_dir"
+          echo "Activate TLS 1.2"
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          Register-PSRepository -Name $_repo_name -SourceLocation $_feed -PublishLocation $_feed -InstallationPolicy 'Trusted' -Credential $_creds -Verbose
+          
+          echo "Register repository"
+          Register-PSRepository -Name $_repo_name -SourceLocation $_feed -PublishLocation $_feed -InstallationPolicy 'Trusted' -Credential $_creds
+          
+          echo "Publish the package"
           Publish-Module -Path "$_repo_dir" -Repository "SAPSGallery" -NuGetApiKey "$($env:GH_TOKEN)" -Verbose
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-#           # original link: https://geoffodonnell.github.io/how-to/github-workflow-publish-powershell-module/ 
-
-#           $_repo_dir = "{0}\shiftavenue-pswslmanage" -f $($env:RUNNER_WORKSPACE)
-#           $_user = "${{ github.actor }}"
-#           $_token = "${{ github.token }}" | ConvertTo-SecureString -AsPlainText -Force
-#           $_repo_owner = "${{ github.repository_owner }}"
-#           $_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token)
-#           $_feed = "https://nuget.pkg.github.com/$_repo_owner/index.json"
-#           $_module_name = "pswslmanage"
-#           $_repo_name = "SAPSGallery"
-          
-#           echo "-----------------"
-#           echo "repo_dir:    $_repo_dir"
-#           echo "user:        $_user"
-#           echo "token:       $_token"
-#           echo "repo_owner:  $_repo_owner"
-#           echo "creds:       $_creds"
-#           echo "feeds:       $_feed"
-#           echo "module_name: $_module_name"
-#           echo "repo_name:   $_repo_name"
-#           echo "-----------------"
-
-#           Write-Output "Install module PowershellGet to receive nuget"
-#           Install-Module PowershellGet -Scope CurrentUser -Force -AllowClobber
-
-#           Write-Output "Force TLS1.2"
-#           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          
-#           Write-Output "Register repository
-#           $_args = @{
-#               Name = $_repo_name
-#               SourceLocation = $_feed
-#               PublishLocation = $_feed
-#               InstallationPolicy = 'Trusted'
-#               Credential = $_creds
-#           }
-
-#           Write-Output "Remove PS Repo"
-#           if(Get-PSRepository -Name $_repo_name -ErrorAction SilentlyContinue) {Unregister-PSRepository -Name $_repo_name}
-          
-#           Write-Output "Register Repo"
-#           Register-PSRepository @_args
-          
-#           Write-Output "Publish Module"
-#           Publish-Module -Path $_repo_dir -Repository $_repo_name -NuGetApiKey "${{ github.token }}"
-  
-
-# if(Get-PSRepository -Name $_repo_name -ErrorAction SilentlyContinue) {Unregister-PSRepository -Name $_repo_name}
-
-# [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-
-# Register-PSRepository -Name $_repo_name -SourceLocation $_feed -PublishLocation $_feed -InstallationPolicy 'Trusted' -Credential $_creds
-
-# Publish-Module -Path $_repo_dir -Repository $_repo_name -NuGetApiKey "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"
-
-# Results in (when running in PSCore 7.3.1): 
-
-# Write-Error: Failed to publish module 'pswslmanage': 'nuget.exe failed to push Unable to load the service index for source
-# https://nuget.pkg.github.com/shiftavenue/index.json.   Response status code does not indicate success: 401 (Unauthorized). '.
