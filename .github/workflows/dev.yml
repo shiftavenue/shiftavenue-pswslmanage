@@ -72,6 +72,7 @@ jobs:
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           
           echo "Register repository"
+          if(Get-PSRepository -Name SAPSGallery) { Unregister-PSRepository -Name SAPSGallery }
           Register-PSRepository -Name $_repo_name -SourceLocation $_feed -PublishLocation $_feed -InstallationPolicy 'Trusted' -Credential $_creds
           
           echo "Publish the package"
