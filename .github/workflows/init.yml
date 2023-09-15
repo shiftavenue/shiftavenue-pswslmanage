@@ -25,7 +25,6 @@ jobs:
 
       - name: Download newest version of nuget
         run: |
-          # $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet\nuget.exe" -f $($env:LOCALAPPDATA) # This will download to "C:\Windows\ServiceProfiles\NetworkService\AppData\Local" which can not be used by Publish-Module
-          # $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet\nuget.exe" -f $($env:PROGRAMDATA) # Unauthorized access
+          $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet\nuget.exe" -f $($env:PROGRAMDATA)
           echo "Download nuget to $_local_nuget_path"
-          Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path"
+          if(-Not (Test-Path -Path $_local_nuget_path)) { Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path" }
