@@ -12,21 +12,20 @@ jobs:
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module PSScriptAnalyzer -ErrorAction Stop -Force
 
-      # Needs admin permissions which is not given in github runner service.
-      # - name: Disable TLS 1.3
-      #   run: |
-      #     New-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -Force | Out-Null
-      #     New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null
-      #     New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -name 'DisabledByDefault' -value 1 -PropertyType 'DWord' -Force | Out-Null
-      #     New-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -Force | Out-Null
-      #     New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null
-      #     New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -name 'DisabledByDefault' -value 1 -PropertyType 'DWord' -Force | Out-Null
-      #     New-ItemProperty -path 'HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 | Out-Null
-      #     New-ItemProperty -path 'HKLM:\SOFTWARE\Wow64232Node\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 | Out-Null
+      - name: Disable TLS 1.3
+        run: |
+          New-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -Force | Out-Null
+          New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null
+          New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -name 'DisabledByDefault' -value 1 -PropertyType 'DWord' -Force | Out-Null
+          New-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -Force | Out-Null
+          New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null
+          New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -name 'DisabledByDefault' -value 1 -PropertyType 'DWord' -Force | Out-Null
+          New-ItemProperty -path 'HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 | Out-Null
+          New-ItemProperty -path 'HKLM:\SOFTWARE\Wow64232Node\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 | Out-Null
 
-      # - name: Download newest version of nuget
-      #   run: |
-      #     # $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet\nuget.exe" -f $($env:LOCALAPPDATA) # This will download to "C:\Windows\ServiceProfiles\NetworkService\AppData\Local" which can not be used by Publish-Module
-      #     # $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet\nuget.exe" -f $($env:PROGRAMDATA) # Unauthorized access
-      #     echo "Download nuget to $_local_nuget_path"
-      #     Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path"
+      - name: Download newest version of nuget
+        run: |
+          # $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet\nuget.exe" -f $($env:LOCALAPPDATA) # This will download to "C:\Windows\ServiceProfiles\NetworkService\AppData\Local" which can not be used by Publish-Module
+          # $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet\nuget.exe" -f $($env:PROGRAMDATA) # Unauthorized access
+          echo "Download nuget to $_local_nuget_path"
+          Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path"
