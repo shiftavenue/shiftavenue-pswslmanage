@@ -27,7 +27,26 @@ jobs:
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage.psm1")) {Write-Output "Add issue"; $_issue_list += $_issue}
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-roles.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-helper.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
-          if($_issue_list.Count -gt 0) {$_issue_list; Write-Error "Linter issues found. Exiting"} 
+          if($_issue_list.Count -gt 0) {$_issue_list; Write-Error "Linter issues found. Exiting"}
+
+      - name: Create manifest
+        run: |
+          $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+          Remove-Item -Path "$_repo_dir\pswslmanage.psd1" -Force
+          New-ModuleManifest -Path "$_repo_dir\pswslmanage.psd1" `
+                              -ModuleVersion "1.0.1" `
+                              -Author "David Koenig" `
+                              -Guid "a2d16567-94f2-4a76-8e0d-c29d40177c56" `
+                              -CompatiblePSEditions Core `
+                              -CompanyName "shiftavenue" `
+                              -Copyright "(c) shiftavenue. All rights reserved." `
+                              -RootModule "pswslmanage.psm1" `
+                              -Description "With this module you can install and maintain WSL images" `
+                              -ProcessorArchitecture Amd64 `
+                              -FunctionsToExport @("Add-WslImage", "Test-WslImage", "Get-WslImage", "Remove-WslImage", "Stop-WslImage", "Add-WslUser", "Add-WslRoleSSH" ) `
+                              -Tags "wsl, windows, linux, wsl2, windows subsystem for linux" `
+                              -ProjectUri "https://github.com/shiftavenue/shiftavenue-pswslmanage" `
+                              -IconUri "https://raw.githubusercontent.com/shiftavenue/shiftavenue-pswslmanage/main/Icon.png"
 
       - name: Publish
         run: |

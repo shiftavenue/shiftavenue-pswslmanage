@@ -32,6 +32,4 @@ With the default configuration, the GitHub runner is running as "Network Service
   Start-Process -FilePath "sc" -ArgumentList "config ""$_gh_runner_service_name"" obj=""NT AUTHORITY\SYSTEM"" type=own"
 ```
 
-
-
-#,New-ModuleManifest -Path "C:\Users\david\Documents\Development\shiftavenue\shiftavenue-pswslmanage\pswslmanage_test.psd1" -ModuleVersion "1.0.0" -Author "David Koenig" -Guid "a2d16567-94f2-4a76-8e0d-c29d40177c56" -CompanyName "shiftavenu" -Copyright "(c) shiftavenue. All rights reserved." -RootModule "pswslmanage.psm1" -Description "With this module you can install and maintain WSL images" -ProcessorArchitecture Amd64 -FunctionsToExport @("Add-WslImage", "Test-WslImage", "Get-WslImage", "Remove-WslImage", "Stop-WslImage", "Add-WslUser", "Add-WslRoleSSH" ) -CompatiblePSEditions Core -Tags "wsl, windows, linux, wsl2, windows subsystem for linux" -ProjectUri "https://github.com/shiftavenue/shiftavenue-pswslmanage" -IconUri "https://raw.githubusercontent.com/shiftavenue/shiftavenue-pswslmanage/main/Icon.png"
+When the GitHub runner is installed, you have to start the workflow "sa-ci-init".
