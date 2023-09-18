@@ -18,6 +18,10 @@ jobs:
         with:
           path: ./pswslmanage
 
+      - name:Print variables
+        run: |
+          dir env:
+
       - name: Execute PSScriptAnalyzer
         run: |
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
@@ -38,6 +42,7 @@ jobs:
                               -Author "David Koenig" `
                               -Guid "a2d16567-94f2-4a76-8e0d-c29d40177c56" `
                               -CompatiblePSEditions Core `
+                              -PowerShellVersion 5.1 `
                               -CompanyName "shiftavenue" `
                               -Copyright "(c) shiftavenue. All rights reserved." `
                               -RootModule "pswslmanage.psm1" `
@@ -72,10 +77,10 @@ jobs:
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           
           echo "Register repository"
-          if(Get-PSRepository -Name SAPSGallery) { Unregister-PSRepository -Name SAPSGallery }
+          if(Get-PSRepository -Name SAPSGallery -ErrorAction SilentlyContinue) { Unregister-PSRepository -Name SAPSGallery }
           Register-PSRepository -Name $_repo_name -SourceLocation $_feed -PublishLocation $_feed -InstallationPolicy 'Trusted' -Credential $_creds
           
           echo "Publish the package"
-          Publish-Module -Path "$_repo_dir" -Repository "SAPSGallery" -NuGetApiKey "$($env:GH_TOKEN)" -Verbose
+          Publish-Module -Path "$_repo_dir" -Repository "$_repo_name" -NuGetApiKey "$_token" -Verbose
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
