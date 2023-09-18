@@ -33,6 +33,7 @@ jobs:
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-roles.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-helper.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
           if($_issue_list.Count -gt 0) {$_issue_list; Write-Error "Linter issues found. Exiting"}
+        shell: pwsh
 
       - name: Create manifest
         run: |
@@ -53,6 +54,7 @@ jobs:
                               -Tags "wsl, windows, linux, wsl2, windows subsystem for linux" `
                               -ProjectUri "https://github.com/shiftavenue/shiftavenue-pswslmanage" `
                               -IconUri "https://raw.githubusercontent.com/shiftavenue/shiftavenue-pswslmanage/main/Icon.png"
+        shell: pwsh
 
       - name: Publish
         run: |
@@ -85,3 +87,4 @@ jobs:
           Publish-Module -Path "$_repo_dir" -Repository "$_repo_name" -NuGetApiKey "$_token" -Verbose
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        shell: pwsh
