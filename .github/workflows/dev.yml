@@ -18,7 +18,7 @@ jobs:
         with:
           path: ./pswslmanage
 
-      - name:Print variables
+      - name: Print variables
         run: |
           dir env:
 
