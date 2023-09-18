@@ -21,6 +21,7 @@ jobs:
       - name: Print variables
         run: |
           dir env:
+        shell: pwsh
 
       - name: Execute PSScriptAnalyzer
         run: |
@@ -38,7 +39,7 @@ jobs:
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
           Remove-Item -Path "$_repo_dir\pswslmanage.psd1" -Force
           New-ModuleManifest -Path "$_repo_dir\pswslmanage.psd1" `
-                              -ModuleVersion "1.0.1" `
+                              -ModuleVersion "1.0.$($env:GITHUB_RUN_NUMBER)" `
                               -Author "David Koenig" `
                               -Guid "a2d16567-94f2-4a76-8e0d-c29d40177c56" `
                               -CompatiblePSEditions Core `
