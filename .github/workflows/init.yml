@@ -17,14 +17,14 @@ jobs:
       - name: Install nuget package provider
         run: |
           Install-PackageProvider -Name NuGet -Force | Out-Null
-        shell: "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+        shell: pwsh
 
       - name: Install PSScriptAnalyzer
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module PSScriptAnalyzer -AllowClobber -Force
           Set-PSRepository PSGallery -InstallationPolicy Untrusted
-        shell: "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+        shell: pwsh
 
       - name: Disable TLS 1.3
         run: |
@@ -36,7 +36,7 @@ jobs:
           New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -name 'DisabledByDefault' -value 1 -PropertyType 'DWord' -Force | Out-Null
           New-ItemProperty -path 'HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 -Force | Out-Null
           New-ItemProperty -path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 -Force | Out-Null
-        shell: "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+        shell: pwsh
 
       - name: Download newest version of nuget
         run: |
@@ -44,7 +44,7 @@ jobs:
           if (-Not (Test-Path -Path $_local_nuget_path)) {New-Item -Path $_local_nuget_path -ItemType Directory -Force}
           $ProgressPreference = 'SilentlyContinue'
           Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path\nuget.exe"
-        shell: "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+        shell: pwsh
 
       - name: Install new version 3 of package management
         run: |
@@ -67,4 +67,4 @@ jobs:
 
           echo "Set PS Gallery to untrusted"
           Set-PSRepository PSGallery -InstallationPolicy Untrusted
-        shell: "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+        shell: pwsh
