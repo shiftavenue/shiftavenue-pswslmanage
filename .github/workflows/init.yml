@@ -7,6 +7,12 @@ jobs:
     name: sa-ci-init
     runs-on: [self-hosted]
     steps:
+      - name: Install pwsh
+        run: |
+          Invoke-WebRequest -Uri https://github.com/PowerShell/PowerShell/releases/download/v7.3.6/PowerShell-7.3.6-win-x64.msi -OutFile $env:temp\pwsh.msi
+          msiexec.exe /package $env:temp\pwsh.msi /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=0 ADD_FILE_CONTEXT_MENU_RUNPOWERSHELL=0 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=0 ENABLE_MU=0 ADD_PATH=1 DISABLE_TELEMETRY=1
+          Remove-Item $env:temp\pwsh.msi -Force
+      
       - name: Install PSScriptAnalyzer
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
@@ -28,3 +34,19 @@ jobs:
           $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet" -f $($env:PROGRAMDATA)
           if (-Not (Test-Path -Path $_local_nuget_path)) {New-Item -Path $_local_nuget_path -ItemType Directory -Force}
           Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path\nuget.exe"
+
+      - name: Install new version 3 of package management
+        run: |
+          echo "Remove module < version 3"
+          if(Get-Module PackageManagement) { Remove-Module PackageManagement }
+          if(Get-Module PowershellGet) { Remove-Module PowershellGet }
+
+          echo "Uninstall old version of package management"
+          Uninstall-Module PackageManagement -ErrorAction SilentlyContinue
+          Uninstall-Module PowershellGet -ErrorAction SilentlyContinue
+
+          echo "Install PSResourceGet module"
+          Install-Module Microsoft.PowerShell.PSResourceGet -AllowClobber -AllowPrerelease
+
+          echo "Install the compat-module which allows us to work with normal Credential objects"
+          if(-Not (Get-Module CompatPowerShellGet -ListAvailable)) Install-Module -Name CompatPowerShellGet -AllowClobber 
