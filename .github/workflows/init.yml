@@ -56,3 +56,4 @@ jobs:
 
           echo "Set PS Gallery to trusted"
           Set-PSRepository PSGallery -InstallationPolicy Untrusted
+        shell: pwsh
