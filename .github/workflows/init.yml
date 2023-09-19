@@ -16,7 +16,8 @@ jobs:
       - name: Install PSScriptAnalyzer
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
-          Install-Module PSScriptAnalyzer -ErrorAction Stop -Force
+          Install-Module PSScriptAnalyzer -AllowClobber -Force
+          Set-PSRepository PSGallery -InstallationPolicy Untrusted
 
       - name: Disable TLS 1.3
         run: |
@@ -54,6 +55,6 @@ jobs:
           echo "Install the compat-module which allows us to work with normal Credential objects"
           Install-Module -Name CompatPowerShellGet -AllowClobber -Force
 
-          echo "Set PS Gallery to trusted"
+          echo "Set PS Gallery to untrusted"
           Set-PSRepository PSGallery -InstallationPolicy Untrusted
         shell: pwsh
