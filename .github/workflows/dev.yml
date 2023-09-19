@@ -79,6 +79,12 @@ jobs:
           echo "Activate TLS 1.2"
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           
+          echo "Import the PSResouceGet module"
+          Import-Module -Name Microsoft.PowerShell.PSResourceGet
+          
+          echo "Import the PowerShellGet Comapt Module"
+          Import-Module -Name CompatPowerShellGet -Force
+          
           echo "Register repository"
           if(Get-PSRepository -Name SAPSGallery -ErrorAction SilentlyContinue) { Unregister-PSRepository -Name SAPSGallery }
           Register-PSRepository -Name $_repo_name -SourceLocation $_feed -PublishLocation $_feed -InstallationPolicy 'Trusted' -Credential $_creds
