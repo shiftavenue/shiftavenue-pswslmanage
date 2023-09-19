@@ -63,7 +63,8 @@ jobs:
           $_feed = "https://nuget.pkg.github.com/$_repo_owner/index.json"
           $_user = "github"
           $_token = "$($env:GH_TOKEN)" | ConvertTo-SecureString -AsPlainText -Force
-          $_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token)
+          $_token_enc = "$_token" | ConvertTo-SecureString -AsPlainText -Force
+          $_creds = New-Object System.Management.Automation.PSCredential -ArgumentList @($_user, $_token_enc)
           $_module_name = "pswslmanage"
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
 
