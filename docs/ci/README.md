@@ -14,6 +14,80 @@ Restart-Computer
 #Remove-Item $env:temp\pwsh.msi -Force
 ```
 
+## Configure Powershell core
+
+In Powershell core several components must be available. Please open "pwsh" and execute the following commands.
+
+### Disable TLS 1.3
+
+The NuGet pacakge provider does not work with TLS 1.3
+
+```powershell
+New-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -Force | Out-Null
+New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null
+New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -name 'DisabledByDefault' -value 1 -PropertyType 'DWord' -Force | Out-Null
+New-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -Force | Out-Null
+New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null
+New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -name 'DisabledByDefault' -value 1 -PropertyType 'DWord' -Force | Out-Null
+New-ItemProperty -path 'HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 -Force | Out-Null
+New-ItemProperty -path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 -Force | Out-Null
+```
+
+### Install NuGet components
+
+To have NuGet available, it must be installed in Powershell Core.
+
+```powershell
+Set-PSRepository PSGallery -InstallationPolicy Trusted
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12´
+Set-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NetFramework\v4.0.30319' -Name 'SchUseStrongCrypto' -Value '1' -Type DWord
+Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\.NetFramework\v4.0.30319' -Name 'SchUseStrongCrypto' -Value '1' -Type DWord
+Install-Module PowershellGet -Force
+Set-PSRepository PSGallery -InstallationPolicy Untrusted
+#Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
+
+$_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet" -f $($env:PROGRAMDATA)
+if (-Not (Test-Path -Path $_local_nuget_path)) {New-Item -Path $_local_nuget_path -ItemType Directory -Force}
+$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path\nuget.exe"
+```
+### Update Powershell package management
+
+Only the new PowerShellGet version is working with GitHub packages.
+
+```powershell
+echo "Remove module < version 3"
+Remove-Module PackageManagement -ErrorAction SilentlyContinue
+Remove-Module PowershellGet -ErrorAction SilentlyContinue
+
+echo "Uninstall old version of package management"
+Uninstall-Module PackageManagement -ErrorAction SilentlyContinue
+Uninstall-Module PowershellGet -ErrorAction SilentlyContinue
+
+echo "Set PS Gallery to trusted"
+Set-PSRepository PSGallery -InstallationPolicy Trusted
+
+echo "Install PSResourceGet module"
+Install-Module Microsoft.PowerShell.PSResourceGet -AllowClobber -AllowPrerelease -Force
+
+echo "Install the compat-module which allows us to work with normal Credential objects"
+Install-Module -Name CompatPowerShellGet -AllowClobber -Force
+
+echo "Set PS Gallery to untrusted"
+Set-PSRepository PSGallery -InstallationPolicy Untrusted
+```
+
+### Install PSScriptAnalyzer
+
+The PSScriptAnalyzer is used to check all scripts.
+
+```powershell
+Set-PSRepository PSGallery -InstallationPolicy Trusted
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Install-Module PSScriptAnalyzer -AllowClobber -Force
+Set-PSRepository PSGallery -InstallationPolicy Untrusted
+```
+
 ## Install the GitHub runner on Windows Server 2022
 
 - Create a windows maschine somewhere
@@ -27,8 +101,8 @@ Restart-Computer
 
 ```powershell
   $_gh_runner_version="2.309.0"
-  $_gh_runner_hash="fdfdsfdys"
-  $_gh_runner_token="mytoken"
+  $_gh_runner_hash="You hash code"
+  $_gh_runner_token="your token"
   mkdir "C:\ProgramData\GitHub-Actions-Runner"
   Set-Location -Path "C:\ProgramData\GitHub-Actions-Runner"
   $ProgressPreference = 'SilentlyContinue'

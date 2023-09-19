@@ -22,6 +22,7 @@ jobs:
       - name: Print variables
         run: |
           dir env:
+          $PSVersionTable
         shell: pwsh
 
       - name: Execute PSScriptAnalyzer
