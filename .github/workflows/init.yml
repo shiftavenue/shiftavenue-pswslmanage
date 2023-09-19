@@ -10,12 +10,14 @@ jobs:
 
       - name: Install nuget package provider
         run: |
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           Install-PackageProvider -Name NuGet -Force | Out-Null
         shell: pwsh
 
       - name: Install PSScriptAnalyzer
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           Install-Module PSScriptAnalyzer -AllowClobber -Force
           Set-PSRepository PSGallery -InstallationPolicy Untrusted
         shell: pwsh
