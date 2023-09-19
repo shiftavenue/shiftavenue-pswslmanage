@@ -84,11 +84,11 @@ jobs:
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           
           echo "Import the PSResouceGet module"
-          Install-Module -Name Microsoft.PowerShell.PSResourceGet -AllowClobber -Force -Scope CurrentUser
+          Install-Module -Name Microsoft.PowerShell.PSResourceGet -AllowClobber -AllowPrerelease -Force -Scope CurrentUser
           Import-Module -Name Microsoft.PowerShell.PSResourceGet
           
           echo "Import the PowerShellGet Comapt Module"
-          Install-Module -Name CompatPowerShellGet -AllowClobber -AllowPrerelease -Force -Scope CurrentUser
+          Install-Module -Name CompatPowerShellGet -AllowClobber -Force -Scope CurrentUser
           Import-Module -Name CompatPowerShellGet -Force
           
           echo "Register repository"
