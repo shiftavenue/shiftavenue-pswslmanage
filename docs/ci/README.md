@@ -51,6 +51,7 @@ if (-Not (Test-Path -Path $_local_nuget_path)) {New-Item -Path $_local_nuget_pat
 $ProgressPreference = 'SilentlyContinue'
 Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path\nuget.exe"
 ```
+
 ### Update Powershell package management
 
 Only the new PowerShellGet version is working with GitHub packages.
