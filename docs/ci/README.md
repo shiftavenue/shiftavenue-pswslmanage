@@ -2,6 +2,17 @@
 
 This describes how to create the CI environment for the PsWslManage.
 
+## Install Powershell Core
+
+Execute the following script to install Powershell Core on the system.
+
+```powershell
+$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri https://github.com/PowerShell/PowerShell/releases/download/v7.3.6/PowerShell-7.3.6-win-x64.msi -OutFile $env:temp\pwsh.msi
+Start-Process -FilePath "msiexec" -ArgumentList "/package ""$env:temp\pwsh.msi"" /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=0 ADD_FILE_CONTEXT_MENU_RUNPOWERSHELL=0 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=0 ENABLE_MU=0 ADD_PATH=1 DISABLE_TELEMETRY=1"
+#Remove-Item $env:temp\pwsh.msi -Force
+```
+
 ## Install the GitHub runner on Windows Server 2022
 
 - Create a windows maschine somewhere
@@ -19,6 +30,7 @@ This describes how to create the CI environment for the PsWslManage.
   $_gh_runner_token="mytoken"
   mkdir "C:\ProgramData\GitHub-Actions-Runner"
   Set-Location -Path "C:\ProgramData\GitHub-Actions-Runner"
+  $ProgressPreference = 'SilentlyContinue'
   Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v$($_gh_runner_version)/actions-runner-win-x64-$($_gh_runner_version).zip -OutFile actions-runner-win-x64.zip
   if((Get-FileHash -Path actions-runner-win-x64-2.309.0.zip -Algorithm SHA256).Hash.ToUpper() -ne $($_gh_runner_hash).ToUpper()){ throw 'Computed checksum did not match' }
   Add-Type -AssemblyName System.IO.Compression.FileSystem
