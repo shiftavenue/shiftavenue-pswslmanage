@@ -9,6 +9,7 @@ jobs:
     steps:
       - name: Install pwsh
         run: |
+          $ProgressPreference = 'SilentlyContinue'
           Invoke-WebRequest -Uri https://github.com/PowerShell/PowerShell/releases/download/v7.3.6/PowerShell-7.3.6-win-x64.msi -OutFile $env:temp\pwsh.msi
           Start-Process -FilePath "msiexec" -ArgumentList "/package ""$env:temp\pwsh.msi"" /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=0 ADD_FILE_CONTEXT_MENU_RUNPOWERSHELL=0 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=0 ENABLE_MU=0 ADD_PATH=1 DISABLE_TELEMETRY=1"
           Remove-Item $env:temp\pwsh.msi -Force
@@ -16,14 +17,14 @@ jobs:
       - name: Install nuget package provider
         run: |
           Install-PackageProvider -Name NuGet -Force | Out-Null
-        shell: pwsh
+        shell: "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
 
       - name: Install PSScriptAnalyzer
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module PSScriptAnalyzer -AllowClobber -Force
           Set-PSRepository PSGallery -InstallationPolicy Untrusted
-        shell: pwsh
+        shell: "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
 
       - name: Disable TLS 1.3
         run: |
@@ -35,14 +36,15 @@ jobs:
           New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -name 'DisabledByDefault' -value 1 -PropertyType 'DWord' -Force | Out-Null
           New-ItemProperty -path 'HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 -Force | Out-Null
           New-ItemProperty -path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319' -Name 'SystemDefaultTlsVersions' -PropertyType 'Dword' -Value 1 -Force | Out-Null
-        shell: pwsh
+        shell: "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
 
       - name: Download newest version of nuget
         run: |
           $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet" -f $($env:PROGRAMDATA)
           if (-Not (Test-Path -Path $_local_nuget_path)) {New-Item -Path $_local_nuget_path -ItemType Directory -Force}
+          $ProgressPreference = 'SilentlyContinue'
           Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path\nuget.exe"
-        shell: pwsh
+        shell: "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
 
       - name: Install new version 3 of package management
         run: |
@@ -65,4 +67,4 @@ jobs:
 
           echo "Set PS Gallery to untrusted"
           Set-PSRepository PSGallery -InstallationPolicy Untrusted
-        shell: pwsh
+        shell: "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
