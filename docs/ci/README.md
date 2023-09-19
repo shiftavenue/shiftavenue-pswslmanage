@@ -67,7 +67,7 @@ Uninstall-Module PowershellGet -ErrorAction SilentlyContinue
 
 echo "Set PS Gallery to trusted"
 Set-PSRepository PSGallery -InstallationPolicy Trusted
-
+Get-Module -ListAvailable
 echo "Install PSResourceGet module"
 Install-Module Microsoft.PowerShell.PSResourceGet -AllowClobber -AllowPrerelease -Force
 
