@@ -22,7 +22,6 @@ jobs:
       - name: Print variables
         run: |
           dir env:
-          $PSVersionTable
         shell: pwsh
 
       - name: Execute PSScriptAnalyzer
@@ -31,6 +30,7 @@ jobs:
           $_issue_list=$null
           $_issue_list=@()
           echo "Working directory for script analyzer: $_repo_dir"
+          Import-Module PSScriptAnalyzer -Force
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage.psm1")) {Write-Output "Add issue"; $_issue_list += $_issue}
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-roles.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-helper.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
