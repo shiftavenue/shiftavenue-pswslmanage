@@ -1,10 +1,9 @@
 ---
 name: sa-pswslmanage-dev
-on: workflow_dispatch
-  #push
-  # pull_request:
-  #   branches:
-  #     - dev
+on: 
+  pull_request:
+    branches:
+      - dev
 
 jobs:
   sa-pswslmanage-dev:
@@ -69,15 +68,20 @@ jobs:
           $_module_name = "pswslmanage"
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
 
-          echo "-----------------"
-          echo "repo_name:   $_repo_name"
-          echo "repo_dir:    $_repo_dir"
-          echo "-----------------"
-
+          echo "Install nuget"
           $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet" -f $($env:LOCALAPPDATA)
           if (-Not (Test-Path -Path $_local_nuget_path)) {New-Item -Path $_local_nuget_path -ItemType Directory -Force}
           $ProgressPreference = 'SilentlyContinue'
           Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path\nuget.exe"
+
+          echo "Delete unwanted files from local repo dir"
+          if (Test-Path -Path $_repo_dir\.github) { Remove-Item "$_repo_dir\.github" -Recurse -Force }
+          if (Test-Path -Path $_repo_dir\docs) { Remove-Item "$_repo_dir\docs" -Recurse -Force }
+          if (Test-Path -Path $_repo_dir\.gitattributes) { Remove-Item "$_repo_dir\.gitattributes" -Force }
+          if (Test-Path -Path $_repo_dir\.gitignore) { Remove-Item "$_repo_dir\.gitignore" -Force }
+          if (Test-Path -Path $_repo_dir\CODEOWNERS) { Remove-Item "$_repo_dir\CODEOWNERS" -Force }
+          if (Test-Path -Path $_repo_dir\PULL_REQUEST_TEMPLATE.md) { Remove-Item "$_repo_dir\PULL_REQUEST_TEMPLATE.md" -Force }
+          if (Test-Path -Path $_repo_dir\README.md) { Remove-Item "$_repo_dir\README.md" -Force }
 
           echo "Publish the package"
           Publish-Module -Path "$_repo_dir" -Repository "$_repo_name" -NuGetApiKey "$_token" -Verbose
