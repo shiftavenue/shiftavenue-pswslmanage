@@ -74,7 +74,7 @@ jobs:
           $ProgressPreference = 'SilentlyContinue'
           Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path\nuget.exe"
 
-          echo "Delete unwanted files from local repo dir"
+          echo "Delete unwanted files from the local repo dir"
           if (Test-Path -Path $_repo_dir\.github) { Remove-Item "$_repo_dir\.github" -Recurse -Force }
           if (Test-Path -Path $_repo_dir\docs) { Remove-Item "$_repo_dir\docs" -Recurse -Force }
           if (Test-Path -Path $_repo_dir\.gitattributes) { Remove-Item "$_repo_dir\.gitattributes" -Force }
