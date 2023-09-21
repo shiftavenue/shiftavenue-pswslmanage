@@ -30,8 +30,10 @@ jobs:
           $_issue_list=$null
           $_issue_list=@()
           echo "Working directory for script analyzer: $_repo_dir"
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module PSScriptAnalyzer -AllowClobber -Scope CurrentUser -ErrorAction SilentlyContinue
           Import-Module PSScriptAnalyzer -ErrorAction SilentlyContinue
+          Set-PSRepository PSGallery -InstallationPolicy Untrusted
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage.psm1")) {Write-Output "Add issue"; $_issue_list += $_issue}
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-roles.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
           foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-helper.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
@@ -84,12 +86,14 @@ jobs:
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           
           echo "Import the PSResouceGet module"
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module -Name Microsoft.PowerShell.PSResourceGet -AllowClobber -AllowPrerelease -Force -Scope CurrentUser
           Import-Module -Name Microsoft.PowerShell.PSResourceGet
           
           echo "Import the PowerShellGet Comapt Module"
           Install-Module -Name CompatPowerShellGet -AllowClobber -Force -Scope CurrentUser
           Import-Module -Name CompatPowerShellGet -Force
+          Set-PSRepository PSGallery -InstallationPolicy Untrusted
           
           echo "Register repository"
           if(Get-PSRepository -Name SAPSGallery -ErrorAction SilentlyContinue) { Unregister-PSRepository -Name SAPSGallery }
