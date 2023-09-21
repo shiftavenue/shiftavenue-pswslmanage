@@ -1,6 +1,11 @@
 # Create the CI environment
 
-This describes how to create the CI environment for the PsWslManage.
+This describes how to create the CICD environment for the PsWslManage. I tried also to to do that with GitHub packages which fails. The documentation about that is available [here](PublishToGitHubPackages.md).
+
+## Create a PowershellGallery API key
+
+Please go to your [api key manage](https://www.powershellgallery.com/account/apikeys) and create an API key. The key has a maximum validity of 365 days. Outdated keys can easily refreshed with the "Regenerate" Button.
+The current key was created 2023-09-21.
 
 ## Install Powershell Core
 
