@@ -2,12 +2,23 @@
 
 This describes how to create the CICD environment for the PsWslManage. I tried also to to do that with GitHub packages which fails. The documentation about that is available [here](PublishToGitHubPackages.md).
 
-## Create a PowershellGallery API key
+- [Create the CI environment](#create-the-ci-environment)
+  - [Create the CICD environment](#create-the-cicd-environment)
+    - [Create a PowershellGallery API key](#create-a-powershellgallery-api-key)
+    - [Install Powershell Core](#install-powershell-core)
+    - [Install the GitHub runner on Windows Server 2022](#install-the-github-runner-on-windows-server-2022)
+  - [Execute powershell as NETWORK SERVICE](#execute-powershell-as-network-service)
+
+## Create the CICD environment
+
+Following everything is described to prepare a server as a self-hosted runner.
+
+### Create a PowershellGallery API key
 
 Please go to your [api key manage](https://www.powershellgallery.com/account/apikeys) and create an API key. The key has a maximum validity of 365 days. Outdated keys can easily refreshed with the "Regenerate" Button.
 The current key was created 2023-09-21.
 
-## Install Powershell Core
+### Install Powershell Core
 
 Execute the following script to install Powershell Core on the system.
 
@@ -19,7 +30,7 @@ Remove-Item $env:temp\pwsh.msi -Force
 Restart-Computer
 ```
 
-## Install the GitHub runner on Windows Server 2022
+### Install the GitHub runner on Windows Server 2022
 
 - Create a windows maschine somewhere
 - Navigate to "https://github.com/shiftavenue/shiftavenue-pswslmanage/settings/actions/runners/new?arch=x64&os=win" and get the following values in the example script:
@@ -45,3 +56,23 @@ Restart-Computer
 ```
 
 When the GitHub runner is installed, you have to start the workflow "sa-ci-init".
+
+## Execute powershell as NETWORK SERVICE
+
+The GitHub runner is executed in the context of the "NETWORK SERVICE" account. In some situation it makes sense to open a pwsh shell in the context of the same user interactive to test some things. This little Powershell scripts shows you how to do that with PsExec.
+
+```powershell
+$_temp_ps_output = Join-Path -Path $env:TEMP -ChildPath 'PsTools'
+$_temp_psexe = "{0}\PsExec64.exe" -f $_temp_ps_output
+
+if(-Not(Test-Path -Path "$_temp_psexe")) {
+  $_temp_file = '{0}.zip' -f [System.IO.Path]::GetTempFileName()
+  Invoke-WebRequest -Uri $_url -OutFile $_temp_file
+  Add-Type -AssemblyName System.IO.Compression.FileSystem
+  [System.IO.Compression.ZipFile]::ExtractToDirectory($_temp_file, $_temp_exe)
+  Remove-Item -Path "$_temp_file"
+}
+Start-Process -FilePath "$_temp_psexe" -ArgumentList "-i -u ""nt authority\network service"" pwsh"
+```
+
+Execute `whoami` to check if process is executed as "nt authority\network service".

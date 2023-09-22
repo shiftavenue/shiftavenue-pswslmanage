@@ -24,10 +24,13 @@ jobs:
           echo "Local admin permissions:  $_is_admin"
         shell: pwsh
 
-      - name: Update package provider
-        run: |
-          Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force
-        shell: pwsh
+      # This results in No match was found for the specified search criteria for the provider 'NuGet'. 
+      #    The package provider requires 'PackageManagement' and 'Provider' tags. Please check if the specified package has the tags.
+      #    Error apperas just when execution as github action. Probably 
+      # - name: Update package provider
+      #   run: |
+      #     Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force
+      #   shell: pwsh
 
       - name: Execute PSScriptAnalyzer
         run: |
