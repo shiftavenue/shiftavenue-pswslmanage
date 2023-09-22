@@ -67,7 +67,7 @@ jobs:
                               -Prerelease "dev$($env:GITHUB_RUN_NUMBER)"
         shell: pwsh
       
-      - name: Create local repo
+      - name: Create local repository
         run: |
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
           New-Item "$env:temp\LocalTestRepo" -ItemType Directory -Force
@@ -89,7 +89,7 @@ jobs:
       #     Invoke-Pester "$_repo_dir\tests\pswslmanage.tests.ps1"
       #   shell: pwsh
 
-      - name: Remove local repo
+      - name: Remove local repository
         run: |
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
           Unregister-PSRepository LocalTestRepo
