@@ -1,0 +1,76 @@
+---
+name: ci
+on: 
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  sa-pswslmanage-dev:
+    name: ci
+    runs-on: [self-hosted]
+    permissions:
+      actions: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: ./pswslmanage
+
+      - name: Print variables
+        run: |
+          dir env:
+        shell: pwsh
+
+      - name: Execute PSScriptAnalyzer
+        run: |
+          $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+          $_issue_list=$null
+          $_issue_list=@()
+          echo "Working directory for script analyzer: $_repo_dir"
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module PSScriptAnalyzer -AllowClobber -Scope CurrentUser -ErrorAction SilentlyContinue
+          Import-Module PSScriptAnalyzer -ErrorAction SilentlyContinue
+          Set-PSRepository PSGallery -InstallationPolicy Untrusted
+          foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage.psm1")) {Write-Output "Add issue"; $_issue_list += $_issue}
+          foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-roles.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
+          foreach($_issue in $(Invoke-ScriptAnalyzer -Path "$_repo_dir\pswslmanage-helper.ps1")) {Write-Output "Add issue"; $_issue_list += $_issue}
+          if($_issue_list.Count -gt 0) {$_issue_list; Write-Error "Linter issues found. Exiting"}
+        shell: pwsh
+
+      - name: Create manifest
+        run: |
+          $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+          Remove-Item -Path "$_repo_dir\pswslmanage.psd1" -Force
+          New-ModuleManifest -Path "$_repo_dir\pswslmanage.psd1" `
+                              -ModuleVersion "1.0.$($env:GITHUB_RUN_NUMBER)" `
+                              -Author "David Koenig" `
+                              -Guid "a2d16567-94f2-4a76-8e0d-c29d40177c56" `
+                              -CompatiblePSEditions Core `
+                              -PowerShellVersion 7.3 `
+                              -CompanyName "shiftavenue" `
+                              -Copyright "(c) shiftavenue. All rights reserved." `
+                              -RootModule "pswslmanage.psm1" `
+                              -Description "With this module you can install and maintain WSL images" `
+                              -ProcessorArchitecture Amd64 `
+                              -FunctionsToExport @("Add-WslImage", "Test-WslImage", "Get-WslImage", "Remove-WslImage", "Stop-WslImage", "Add-WslUser", "Add-WslRoleSSH" ) `
+                              -Tags "wsl,windows,linux,wsl2" `
+                              -ProjectUri "https://github.com/shiftavenue/shiftavenue-pswslmanage" `
+                              -IconUri "https://raw.githubusercontent.com/shiftavenue/shiftavenue-pswslmanage/main/Icon.png" `
+                              -Prerelease "dev$($env:GITHUB_RUN_NUMBER)"
+        shell: pwsh
+      
+      - name: Create local repo
+        run: |
+          $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+          New-Item "$env:temp\LocalTestRepo" -ItemType Directory -Force
+          Register-PSRepository -Name LocalTestRepo -SourceLocation "$env:temp\LocalTestRepo" -ScriptSourceLocation "$env:temp\LocalTestRepo" -InstallationPolicy Trusted
+          Publish-Module -Path "$_repo_dir" -Repository "LocalTestRepo" -NuGetApiKey "dummy" -Verbose
+
+      - name: Remove local repo
+        run: |
+          $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+          Unregister-PSRepository LocalTestRepo
+          Remove-Item "$env:temp\LocalTestRepo" -Force -Recurse
+

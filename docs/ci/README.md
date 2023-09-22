@@ -1,6 +1,23 @@
 # Create the CI environment
 
-This describes how to create the CI environment for the PsWslManage.
+This describes how to create the CICD environment for the PsWslManage. I tried also to to do that with GitHub packages which fails. The documentation about that is available [here](PublishToGitHubPackages.md).
+
+## Create a PowershellGallery API key
+
+Please go to your [api key manage](https://www.powershellgallery.com/account/apikeys) and create an API key. The key has a maximum validity of 365 days. Outdated keys can easily refreshed with the "Regenerate" Button.
+The current key was created 2023-09-21.
+
+## Install Powershell Core
+
+Execute the following script to install Powershell Core on the system.
+
+```powershell
+$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri https://github.com/PowerShell/PowerShell/releases/download/v7.3.6/PowerShell-7.3.6-win-x64.msi -OutFile $env:temp\pwsh.msi
+Start-Process -FilePath "msiexec" -ArgumentList "/package ""$env:temp\pwsh.msi"" /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=0 ADD_FILE_CONTEXT_MENU_RUNPOWERSHELL=0 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=0 ENABLE_MU=0 ADD_PATH=1 DISABLE_TELEMETRY=1"
+Remove-Item $env:temp\pwsh.msi -Force
+Restart-Computer
+```
 
 ## Install the GitHub runner on Windows Server 2022
 
@@ -8,30 +25,23 @@ This describes how to create the CI environment for the PsWslManage.
 - Navigate to "https://github.com/shiftavenue/shiftavenue-pswslmanage/settings/actions/runners/new?arch=x64&os=win" and get the following values in the example script:
   - Current version of the GitHub runner
   - Hash code for the GitHub runner binary
-  - The token fo rthe runner
+  - The token for the runner
 - Set all 3 variables in the script below
+- Remove an existing runner entry
 - Execute the script to install the GitHub runner as Windows Service
 
 ```powershell
   $_gh_runner_version="2.309.0"
-  $_gh_runner_hash="cd1920154e365689103aa1f90258e0da47faecce547d0374475cdd2554dbf09a"
-  $_gh_runner_token="mytoken"
+  $_gh_runner_hash="You hash code"
+  $_gh_runner_token="your token"
   mkdir "C:\ProgramData\GitHub-Actions-Runner"
   Set-Location -Path "C:\ProgramData\GitHub-Actions-Runner"
+  $ProgressPreference = 'SilentlyContinue'
   Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v$($_gh_runner_version)/actions-runner-win-x64-$($_gh_runner_version).zip -OutFile actions-runner-win-x64.zip
-  if((Get-FileHash -Path actions-runner-win-x64-2.309.0.zip -Algorithm SHA256).Hash.ToUpper() -ne $($_gh_runner_hash).ToUpper()){ throw 'Computed checksum did not match' }
+  if((Get-FileHash -Path actions-runner-win-x64.zip -Algorithm SHA256).Hash.ToUpper() -ne $($_gh_runner_hash).ToUpper()){ throw 'Computed checksum did not match' }
   Add-Type -AssemblyName System.IO.Compression.FileSystem
-  [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\ProgramData\shiftavenue\unattendbuilder\custom\github-runner\actions-runner-win-x64.zip", "$PWD")
+  [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\ProgramData\GitHub-Actions-Runner\actions-runner-win-x64.zip", "$PWD")
   .\config.cmd --unattended --url "https://github.com/shiftavenue/shiftavenue-pswslmanage" --token "$_gh_runner_token" --name sa-ci-win --runasservice
 ```
 
-With the default configuration, the GitHub runner is running as "Network Service" Account which prevents the execution of admininistrative commands. One way is to reconfigure the service to run as "LOCAL SYSTEM". This permission is needed to run the [init.yml](./../../.github/workflows/init.yaml) workflow which will configure the system to successful run the CI/CD workflows. If you don't want to reconfigure the system this way, you can run the powershell commands in the [init.yml](./../../.github/workflows/init.yaml) by yourself.
-
-```powershell
-  $_gh_runner_service_name=(Get-Service actions.runner.*).name
-  Start-Process -FilePath "sc" -ArgumentList "config ""$_gh_runner_service_name"" obj=""NT AUTHORITY\SYSTEM"" type=own"
-```
-
-
-
-#,New-ModuleManifest -Path "C:\Users\david\Documents\Development\shiftavenue\shiftavenue-pswslmanage\pswslmanage_test.psd1" -ModuleVersion "1.0.0" -Author "David Koenig" -Guid "a2d16567-94f2-4a76-8e0d-c29d40177c56" -CompanyName "shiftavenu" -Copyright "(c) shiftavenue. All rights reserved." -RootModule "pswslmanage.psm1" -Description "With this module you can install and maintain WSL images" -ProcessorArchitecture Amd64 -FunctionsToExport @("Add-WslImage", "Test-WslImage", "Get-WslImage", "Remove-WslImage", "Stop-WslImage", "Add-WslUser", "Add-WslRoleSSH" ) -CompatiblePSEditions Core -Tags "wsl, windows, linux, wsl2, windows subsystem for linux" -ProjectUri "https://github.com/shiftavenue/shiftavenue-pswslmanage" -IconUri "https://raw.githubusercontent.com/shiftavenue/shiftavenue-pswslmanage/main/Icon.png"
+When the GitHub runner is installed, you have to start the workflow "sa-ci-init".
