@@ -37,7 +37,21 @@ jobs:
                               -Prerelease "dev$($env:GITHUB_RUN_NUMBER)"
         shell: pwsh
 
-      - name: Publish
+      # - name: Invoke tests
+      #   run: |
+      #     $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+
+      #     echo "Install Pester"
+      #     Install-Module Pester -AllowClobber -Scope CurrentUser -ErrorAction SilentlyContinue
+      #     Import-Module Pester -ErrorAction SilentlyContinue
+
+      #     echo "Execute tests"
+      #     Invoke-Pester "$_repo_dir\tests\pswslmanage.tests.ps1"
+      #   env:
+      #     PUBLISH_TOKEN: ${{secrets.PSGALLERY_API_KEY}}
+      #   shell: pwsh
+
+      - name: Publish testbuild
         run: |
           $_repo_name = "PSGallery"
           $_token = $($env:PUBLISH_TOKEN)
@@ -58,6 +72,8 @@ jobs:
           if (Test-Path -Path $_repo_dir\CODEOWNERS) { Remove-Item "$_repo_dir\CODEOWNERS" -Force }
           if (Test-Path -Path $_repo_dir\PULL_REQUEST_TEMPLATE.md) { Remove-Item "$_repo_dir\PULL_REQUEST_TEMPLATE.md" -Force }
           if (Test-Path -Path $_repo_dir\README.md) { Remove-Item "$_repo_dir\README.md" -Force }
+          if (Test-Path -Path $_repo_dir\pswslmanage.tests.ps1) { Remove-Item "$_repo_dir\pswslmanage.tests.ps1" -Force }
+          if (Test-Path -Path $_repo_dir\pswslmanage-start.ps1) { Remove-Item "$_repo_dir\pswslmanage-start.ps1" -Force }
 
           echo "Publish the package"
           Publish-Module -Path "$_repo_dir" -Repository "$_repo_name" -NuGetApiKey "$_token" -Verbose
