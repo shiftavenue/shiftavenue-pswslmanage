@@ -78,19 +78,19 @@ jobs:
           Publish-Module -Path "$_repo_dir" -Repository "LocalTestRepo" -NuGetApiKey "dummy" -Verbose
         shell: pwsh
 
-      # - name: Invoke tests
-      #   run: |
-      #     $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+      - name: Invoke tests
+        run: |
+          $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
 
-      #     echo "Install Pester"
-      #     Set-PSRepository PSGallery -InstallationPolicy Trusted
-      #     Install-Module Pester -AllowClobber -Scope CurrentUser -ErrorAction SilentlyContinue -Force
-      #     Import-Module Pester -ErrorAction SilentlyContinue
-      #     Set-PSRepository PSGallery -InstallationPolicy Untrusted
+          echo "Install Pester"
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -AllowClobber -Scope CurrentUser -ErrorAction SilentlyContinue -Force
+          Import-Module Pester -ErrorAction SilentlyContinue
+          Set-PSRepository PSGallery -InstallationPolicy Untrusted
 
       #     echo "Execute tests"
       #     Invoke-Pester "$_repo_dir\tests\pswslmanage.tests.ps1"
-      #   shell: pwsh
+        shell: pwsh
 
       - name: Remove local repository
         run: |

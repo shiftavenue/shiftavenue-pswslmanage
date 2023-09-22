@@ -6,6 +6,7 @@ This describes how to create the CICD environment for the PsWslManage. I tried a
   - [Create the CICD environment](#create-the-cicd-environment)
     - [Create a PowershellGallery API key](#create-a-powershellgallery-api-key)
     - [Install Powershell Core](#install-powershell-core)
+    - [Install Windows Subsystem for linux](#install-windows-subsystem-for-linux)
     - [Install the GitHub runner on Windows Server 2022](#install-the-github-runner-on-windows-server-2022)
   - [Execute powershell as NETWORK SERVICE](#execute-powershell-as-network-service)
 
@@ -28,6 +29,14 @@ Invoke-WebRequest -Uri https://github.com/PowerShell/PowerShell/releases/downloa
 Start-Process -FilePath "msiexec" -ArgumentList "/package ""$env:temp\pwsh.msi"" /quiet ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=0 ADD_FILE_CONTEXT_MENU_RUNPOWERSHELL=0 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 USE_MU=0 ENABLE_MU=0 ADD_PATH=1 DISABLE_TELEMETRY=1"
 Remove-Item $env:temp\pwsh.msi -Force
 Restart-Computer
+```
+
+### Install Windows Subsystem for linux
+
+Execute the following command, to install the WIndows Subsystem for Linux
+
+```powershell
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 ```
 
 ### Install the GitHub runner on Windows Server 2022
@@ -76,3 +85,4 @@ Start-Process -FilePath "$_temp_psexe" -ArgumentList "-i -u ""nt authority\netwo
 ```
 
 Execute `whoami` to check if process is executed as "nt authority\network service".
+Start
