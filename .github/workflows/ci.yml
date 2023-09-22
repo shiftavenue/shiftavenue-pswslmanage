@@ -18,9 +18,15 @@ jobs:
         with:
           path: ./pswslmanage
 
-      - name: Print variables
+      - name: Set and print needed variables
         run: |
-          dir env:
+          $_is_admin=(New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+          echo "Local admin permissions:  $_is_admin"
+        shell: pwsh
+
+      - name: Update package provider
+        run: |
+          Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force
         shell: pwsh
 
       - name: Execute PSScriptAnalyzer
@@ -67,10 +73,26 @@ jobs:
           New-Item "$env:temp\LocalTestRepo" -ItemType Directory -Force
           Register-PSRepository -Name LocalTestRepo -SourceLocation "$env:temp\LocalTestRepo" -ScriptSourceLocation "$env:temp\LocalTestRepo" -InstallationPolicy Trusted
           Publish-Module -Path "$_repo_dir" -Repository "LocalTestRepo" -NuGetApiKey "dummy" -Verbose
+        shell: pwsh
+
+      # - name: Invoke tests
+      #   run: |
+      #     $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+
+      #     echo "Install Pester"
+      #     Set-PSRepository PSGallery -InstallationPolicy Trusted
+      #     Install-Module Pester -AllowClobber -Scope CurrentUser -ErrorAction SilentlyContinue -Force
+      #     Import-Module Pester -ErrorAction SilentlyContinue
+      #     Set-PSRepository PSGallery -InstallationPolicy Untrusted
+
+      #     echo "Execute tests"
+      #     Invoke-Pester "$_repo_dir\tests\pswslmanage.tests.ps1"
+      #   shell: pwsh
 
       - name: Remove local repo
         run: |
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
           Unregister-PSRepository LocalTestRepo
           Remove-Item "$env:temp\LocalTestRepo" -Force -Recurse
+        shell: pwsh
 
