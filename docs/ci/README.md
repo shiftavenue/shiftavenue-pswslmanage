@@ -77,10 +77,10 @@ $_temp_ps_output = Join-Path -Path $env:TEMP -ChildPath 'PsTools'
 $_temp_psexe = "{0}\PsExec64.exe" -f $_temp_ps_output
 
 if(-Not(Test-Path -Path "$_temp_psexe")) {
-  $_temp_file = '{0}.zip' -f [System.IO.Path]::GetTempFileName()
-  Invoke-WebRequest -Uri $_url -OutFile $_temp_file
+  $_temp_file = "{0}" -f [System.IO.Path]::GetTempFileName()
+  Invoke-WebRequest -Uri "https://download.sysinternals.com/files/PSTools.zip" -OutFile $_temp_file
   Add-Type -AssemblyName System.IO.Compression.FileSystem
-  [System.IO.Compression.ZipFile]::ExtractToDirectory($_temp_file, $_temp_exe)
+  [System.IO.Compression.ZipFile]::ExtractToDirectory($_temp_file, $_temp_ps_output)
   Remove-Item -Path "$_temp_file"
 }
 Start-Process -FilePath "$_temp_psexe" -ArgumentList "-i -u ""nt authority\network service"" pwsh"
