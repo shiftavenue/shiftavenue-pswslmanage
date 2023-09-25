@@ -22,6 +22,7 @@ jobs:
         run: |
           $_is_admin=(New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
           echo "Local admin permissions:  $_is_admin"
+          dir env:
         shell: pwsh
 
       # This results in No match was found for the specified search criteria for the provider 'NuGet'. 

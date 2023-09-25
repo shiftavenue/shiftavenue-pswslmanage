@@ -19,6 +19,8 @@ Following everything is described to prepare a server as a self-hosted runner.
 Please go to your [api key manage](https://www.powershellgallery.com/account/apikeys) and create an API key. The key has a maximum validity of 365 days. Outdated keys can easily refreshed with the "Regenerate" Button.
 The current key was created 2023-09-21.
 
+The Key must be added to the GitHub secrets of this repository.
+
 ### Install Powershell Core
 
 Execute the following script to install Powershell Core on the system.
@@ -85,4 +87,3 @@ Start-Process -FilePath "$_temp_psexe" -ArgumentList "-i -u ""nt authority\netwo
 ```
 
 Execute `whoami` to check if process is executed as "nt authority\network service".
-Start
