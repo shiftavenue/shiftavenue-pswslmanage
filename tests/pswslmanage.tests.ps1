@@ -3,15 +3,11 @@ Describe 'Common pswslmanage tests' {
     BeforeAll {
         try {
             
-            if(!$script:_wsl_test_use_existing_image) {
-                # Create a random name used for the test-image and directories
-                $script:_wsl_test_target_environment = $(-join ((65..90) + (97..122) | Get-Random -Count 3 | Foreach-Object {[char]$_}))
-            } else {
-                $script:_wsl_test_target_environment = $script:_wsl_test_existing_suffix
-            }
+            # Create a random name used for the test-image and directories
+            $script:_wsl_test_target_environment = $(-join ((65..90) + (97..122) | Get-Random -Count 3 | Foreach-Object {[char]$_}))
 
             # Define root path for all created objects 
-            $script:_wsl_test_base_path = "$($env:localappdata)\shiftavenue\pswslmanage-test-$script:_wsl_test_target_environment"
+            $script:_wsl_test_base_path = "$($env:programdata)\shiftavenue\pswslmanage-test-$script:_wsl_test_target_environment"
 
             # The name of the target image
             $script:_wsl_test_name = "pswslmanage-test-$($script:_wsl_test_target_environment)"
@@ -31,14 +27,17 @@ Describe 'Common pswslmanage tests' {
             New-Item -Path "$script:_wsl_test_base_path" -Name "baseimg" -ItemType "Directory" -ErrorAction SilentlyContinue
 
             # Try to create the image locally to prevent the download from internet
-            if(Test-Path "$($env:localappdata)\\shiftavenue\pswslmanage-test\Ubuntu2204.appx") {
-
-                Write-Host "Test prerequisites: Copy image from cache into target directory"
-                Copy-Item -Path "$($env:localappdata)\shiftavenue\pswslmanage-test\Ubuntu2204.appx" -Destination "$script:_wsl_test_base_path\baseimg\Ubuntu2204.appx"
-            } else {
+            if(-Not (Test-Path "$($env:programdata)\shiftavenue\pswslmanage-test\Ubuntu2204.appx")) {
                 Write-Host "Test prerequisites: Local image not found. To prevent downloading it from the internet, store the file ""Ubuntu2204.appx"""
                 Write-Host "Test prerequisites:      in path ""$($env:localappdata)\shiftavenue\pswslmanage-test."""
+                Write-Host "Test prerequisites: Downloading image. Please be patient, that can take a while."
+
+                New-Item "$($env:ProgramData)\shiftavenue\pswslmanage-test" -Force -ItemType Directory
+                $ProgressPreference = 'SilentlyContinue'
+                Invoke-WebRequest -Uri "https://aka.ms/wslubuntu2204" -Outfile "$($env:ProgramData)\shiftavenue\pswslmanage-test\Ubuntu2204.appx"
             }
+            Write-Host "Test prerequisites: Copy image from cache into target directory"
+            Copy-Item -Path "$($env:programdata)\shiftavenue\pswslmanage-test\Ubuntu2204.appx" -Destination "$script:_wsl_test_base_path\baseimg\Ubuntu2204.appx"
 
             # Remove module first to get the newest version in session
             if (Get-Module pswslmanage) { 

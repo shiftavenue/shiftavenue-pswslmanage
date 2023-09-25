@@ -396,10 +396,9 @@ function Get-WslImage {
         [string]$WslName
     )
 
-    Write-Output "Try to get information from WslImage $WslName"
-    $_image_property_string =(((wsl.exe -l -v).Replace("`0","")).trim() | ForEach-Object { if (![string]::IsNullOrEmpty($_) -and ($_ -like "*$($WslName)*")){$_out = $($_ -replace '\s+', ';'); Write-Output $_out} })
+    $_image_property_string=(((wsl.exe -l -v).Replace("`0","")).trim() | ForEach-Object { if (![string]::IsNullOrEmpty($_) -and ($_ -like "*$($WslName)*")){$_out = $($_ -replace '\s+', ';'); Write-Output $_out} })
 
-    if([string]::IsNullOrEmpty($_image_property_string)) {
+    if([string]::IsNullOrEmpty($_image_property_string) -or $_image_property_string.Contains("has;no;installed;distributions")) {
         return $null
     }
 
@@ -418,7 +417,6 @@ function Get-WslImage {
     #TODO: Idea: Get the primary from wsl.conf
 
     # Get the internet-connected IP of the WSL by trying to reach the gooogle DNS server
-    Write-Output "Read out the IP address of the WSL"
     $_wsl_ip = Invoke-WSLCommand -Distribution $WslName -Command 'printf $(ip route get 8.8.8.8 | awk -F src ''{print $2}''| awk ''{print $1}'')' -User root
     $_image_properties | Add-Member -MemberType NoteProperty -Name "IP" -Value $_wsl_ip -Force
 
