@@ -19,10 +19,19 @@ jobs:
           path: ./pswslmanage
 
       - name: Increase build variable
-        uses: action-pack/increment@v2
-        with:
-          name: 'BUILD_NUMBER'
-          token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          $_username="dummy"
+          $_token=$($env:GH_TOKEN)
+          $_base64_auth_info = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $_username,$_token)))
+          $_headers = @{Authorization="Basic $_base64_auth_info"}
+          $_uri = 'https://api.github.com/repos/shiftavenue/shiftavenue-pswslmanage/actions/variables/BUILD_NUMBER'
+          $_build_number = [int](Invoke-RestMethod -Uri $_uri -Method Get -Headers $_headers).value
+          $_build_number++
+          Invoke-RestMethod -Uri $_uri -Method Patch -Headers $_headers -Body (@{"name"="BUILD_NUMBER";"value"="$_build_number"} | ConvertTo-Json)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Set and print needed variables
         run: |
