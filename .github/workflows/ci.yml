@@ -30,6 +30,7 @@ jobs:
           $_build_number++
           Invoke-RestMethod -Uri $_uri -Method Patch -Headers $_headers -Body (@{"name"="BUILD_NUMBER";"value"="$_build_number"} | ConvertTo-Json)
           Write-Output CUSTOM_BUILD_NUMBER=$_build_number >> $GITHUB_ENV
+          #Write-Output -InputObject CUSTOM_BUILD_NUMBER is set to $_build_number
         env:
           GH_TOKEN: ${{secrets.RUNNER_PAT}}
 
@@ -37,11 +38,11 @@ jobs:
         run: |
           $_is_admin=(New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
           echo "Local admin permissions:  $_is_admin"
-          echo ${{ vars.BUILD_NUMBER }}
+          echo "Build number in GitHub variables: ${{ vars.BUILD_NUMBER }}""
           dir env:
         shell: pwsh
-        env:
-          CUSTOM_BUILD_NUMBER: ${{ env.CUSTOM_BUILD_NUMBER }}
+        # env:
+        #   CUSTOM_BUILD_NUMBER: ${{ env.CUSTOM_BUILD_NUMBER }}
       # This results in No match was found for the specified search criteria for the provider 'NuGet'. 
       #    The package provider requires 'PackageManagement' and 'Provider' tags. Please check if the specified package has the tags.
       #    Error apperas just when execution as github action. Probably 
@@ -85,10 +86,10 @@ jobs:
                               -Tags "wsl,windows,linux,wsl2" `
                               -ProjectUri "https://github.com/shiftavenue/shiftavenue-pswslmanage" `
                               -IconUri "https://raw.githubusercontent.com/shiftavenue/shiftavenue-pswslmanage/main/Icon.png" `
-                              -Prerelease "dev$($env:CUSTOM_BUILD_NUMBER)"
+                              -Prerelease "dev${{ vars.BUILD_NUMBER }}"
         shell: pwsh
-        env:
-          CUSTOM_BUILD_NUMBER: ${{ env.CUSTOM_BUILD_NUMBER }}
+        # env:
+        #   CUSTOM_BUILD_NUMBER: ${{ env.CUSTOM_BUILD_NUMBER }}
       
       # - name: Create local repository
       #   run: |
