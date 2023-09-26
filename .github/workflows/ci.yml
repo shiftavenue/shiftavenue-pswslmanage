@@ -6,7 +6,7 @@ on:
       - dev
 
 jobs:
-  sa-pswslmanage-dev:
+  ci:
     name: ci
     runs-on: [self-hosted]
     permissions:
@@ -38,7 +38,7 @@ jobs:
         run: |
           $_is_admin=(New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
           echo "Local admin permissions:  $_is_admin"
-          echo "Build number in GitHub variables: ${{ vars.BUILD_NUMBER }}""
+          echo "Build number in GitHub variables: ${{ vars.BUILD_NUMBER }}"
           dir env:
         shell: pwsh
         # env:
