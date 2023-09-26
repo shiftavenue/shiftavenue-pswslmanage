@@ -1,5 +1,5 @@
 ---
-name: sa-pswslmanage-dev
+name: ci
 on: 
   pull_request:
     branches:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   sa-pswslmanage-dev:
-    name: sa-pswslmanage-dev
+    name: ci
     runs-on: [self-hosted]
     permissions:
       actions: read
@@ -20,19 +20,8 @@ jobs:
 
       - name: Print variables
         run: |
-          $_is_admin=(New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-          echo "Local admin permissions:  $_is_admin"
-          echo " ${{ vars.BUILD_NUMBER }}"
           dir env:
         shell: pwsh
-
-      # This results in No match was found for the specified search criteria for the provider 'NuGet'. 
-      #    The package provider requires 'PackageManagement' and 'Provider' tags. Please check if the specified package has the tags.
-      #    Error apperas just when execution as github action. Probably this step is not needed if a NuGetv2 repo is used.  
-      # - name: Update package provider
-      #   run: |
-      #     Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force
-      #   shell: pwsh
 
       - name: Execute PSScriptAnalyzer
         run: |
@@ -71,31 +60,17 @@ jobs:
                               -IconUri "https://raw.githubusercontent.com/shiftavenue/shiftavenue-pswslmanage/main/Icon.png" `
                               -Prerelease "dev$($env:GITHUB_RUN_NUMBER)"
         shell: pwsh
-
-      - name: Publish
+      
+      - name: Create local repo
         run: |
-          $_repo_name = "PSGallery"
-          $_token = $($env:PUBLISH_TOKEN)
-          $_module_name = "pswslmanage"
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+          New-Item "$env:temp\LocalTestRepo" -ItemType Directory -Force
+          Register-PSRepository -Name LocalTestRepo -SourceLocation "$env:temp\LocalTestRepo" -ScriptSourceLocation "$env:temp\LocalTestRepo" -InstallationPolicy Trusted
+          Publish-Module -Path "$_repo_dir" -Repository "LocalTestRepo" -NuGetApiKey "dummy" -Verbose
 
-          echo "Install nuget"
-          $_local_nuget_path = "{0}\Microsoft\Windows\PowerShell\PowerShellGet" -f $($env:LOCALAPPDATA)
-          if (-Not (Test-Path -Path $_local_nuget_path)) {New-Item -Path $_local_nuget_path -ItemType Directory -Force}
-          $ProgressPreference = 'SilentlyContinue'
-          Invoke-WebRequest -Uri "https://aka.ms/psget-nugetexe" -OutFile "$_local_nuget_path\nuget.exe"
+      - name: Remove local repo
+        run: |
+          $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
+          Unregister-PSRepository LocalTestRepo
+          Remove-Item "$env:temp\LocalTestRepo" -Force -Recurse
 
-          echo "Delete unwanted files from local repo dir"
-          if (Test-Path -Path $_repo_dir\.github) { Remove-Item "$_repo_dir\.github" -Recurse -Force }
-          if (Test-Path -Path $_repo_dir\docs) { Remove-Item "$_repo_dir\docs" -Recurse -Force }
-          if (Test-Path -Path $_repo_dir\.gitattributes) { Remove-Item "$_repo_dir\.gitattributes" -Force }
-          if (Test-Path -Path $_repo_dir\.gitignore) { Remove-Item "$_repo_dir\.gitignore" -Force }
-          if (Test-Path -Path $_repo_dir\CODEOWNERS) { Remove-Item "$_repo_dir\CODEOWNERS" -Force }
-          if (Test-Path -Path $_repo_dir\PULL_REQUEST_TEMPLATE.md) { Remove-Item "$_repo_dir\PULL_REQUEST_TEMPLATE.md" -Force }
-          if (Test-Path -Path $_repo_dir\README.md) { Remove-Item "$_repo_dir\README.md" -Force }
-
-          echo "Publish the package"
-          Publish-Module -Path "$_repo_dir" -Repository "$_repo_name" -NuGetApiKey "$_token" -Verbose
-        env:
-          PUBLISH_TOKEN: ${{secrets.PSGALLERY_API_KEY}}
-        shell: pwsh
