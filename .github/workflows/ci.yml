@@ -18,6 +18,12 @@ jobs:
         with:
           path: ./pswslmanage
 
+      - name: Increase build variable
+        uses: action-pack/increment@v2
+        with:
+          name: 'BUILD_NUMBER'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set and print needed variables
         run: |
           $_is_admin=(New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -25,7 +31,6 @@ jobs:
           echo ${{ vars.BUILD_NUMBER }}
           dir env:
         shell: pwsh
-
       # This results in No match was found for the specified search criteria for the provider 'NuGet'. 
       #    The package provider requires 'PackageManagement' and 'Provider' tags. Please check if the specified package has the tags.
       #    Error apperas just when execution as github action. Probably 
