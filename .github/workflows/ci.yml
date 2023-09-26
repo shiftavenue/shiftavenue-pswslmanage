@@ -31,7 +31,7 @@ jobs:
           Invoke-RestMethod -Uri $_uri -Method Patch -Headers $_headers -Body (@{"name"="BUILD_NUMBER";"value"="$_build_number"} | ConvertTo-Json)
         shell: pwsh
         env:
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GH_TOKEN: ${{secrets.PSGALLERY_API_KEY}}
 
       - name: Set and print needed variables
         run: |
