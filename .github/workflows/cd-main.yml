@@ -1,16 +1,16 @@
 ---
-name: cd-dev
+name: cd-main
 on:
   pull_request_target:
     types:
       - closed
     branches:    
-      - dev
+      - main
 
 jobs:
-  cd_dev:
+  cd_main:
     if: github.event.pull_request.merged == true
-    name: cd-dev
+    name: cd-main
     runs-on: [self-hosted]
     permissions:
       actions: read
@@ -39,11 +39,10 @@ jobs:
                               -FunctionsToExport @("Add-WslImage", "Test-WslImage", "Get-WslImage", "Remove-WslImage", "Stop-WslImage", "Add-WslUser", "Add-WslRoleSSH" ) `
                               -Tags "wsl,windows,linux,wsl2" `
                               -ProjectUri "https://github.com/shiftavenue/shiftavenue-pswslmanage" `
-                              -IconUri "https://raw.githubusercontent.com/shiftavenue/shiftavenue-pswslmanage/main/Icon.png" `
-                              -Prerelease "dev${{ vars.BUILD_NUMBER }}"
+                              -IconUri "https://raw.githubusercontent.com/shiftavenue/shiftavenue-pswslmanage/main/Icon.png"
         shell: pwsh
 
-      - name: Publish testbuild
+      - name: Publish productive build
         run: |
           $_repo_name = "PSGallery"
           $_token = $($env:PUBLISH_TOKEN)
