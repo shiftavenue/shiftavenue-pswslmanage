@@ -5,6 +5,7 @@ This describes how to create the CICD environment for the PsWslManage. I tried a
 - [Create the CI environment](#create-the-ci-environment)
   - [Create the CICD environment](#create-the-cicd-environment)
     - [Create a PowershellGallery API key](#create-a-powershellgallery-api-key)
+    - [Create a Personal access token](#create-a-personal-access-token)
     - [Install Powershell Core](#install-powershell-core)
     - [Install Windows Subsystem for linux](#install-windows-subsystem-for-linux)
     - [Install the GitHub runner on Windows Server 2022](#install-the-github-runner-on-windows-server-2022)
@@ -19,7 +20,16 @@ Following everything is described to prepare a server as a self-hosted runner.
 Please go to your [api key manage](https://www.powershellgallery.com/account/apikeys) and create an API key. The key has a maximum validity of 365 days. Outdated keys can easily refreshed with the "Regenerate" Button.
 The current key was created 2023-09-21.
 
-The Key must be added to the GitHub secrets of this repository.
+The Key must be added to the GitHub secrets of this repository (Settings -> Secrets and variables -> Actions -> Secrets).
+
+The secret value is "PSGALLERY_API_KEY".
+
+### Create a Personal access token
+
+Goto your account -> "Settings -> Developer Settings -> Personal access tokens -> Tokens (classic)" and a PAT with full-repo access and workflow access.
+
+Add the PAT to the value "RUNNER_PAT" as descriped in [Create a PowershellGallery API key](#create-a-powershellgallery-api-key).
+
 
 ### Install Powershell Core
 

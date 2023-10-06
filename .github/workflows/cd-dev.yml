@@ -1,9 +1,15 @@
 ---
 name: cd-dev
-on: workflow_dispatch
+on:
+  pull_request_target:
+    types:
+      - closed
+    branches:    
+      - 'dev/**'
 
 jobs:
-  sa-pswslmanage-dev:
+  cd_dev_if_merged:
+    if: github.event.pull_request.merged == true
     name: cd-dev
     runs-on: [self-hosted]
     permissions:
@@ -20,7 +26,7 @@ jobs:
           $_repo_dir = "{0}\shiftavenue-pswslmanage\pswslmanage" -f $($env:RUNNER_WORKSPACE)
           Remove-Item -Path "$_repo_dir\pswslmanage.psd1" -Force
           New-ModuleManifest -Path "$_repo_dir\pswslmanage.psd1" `
-                              -ModuleVersion "1.0.$($env:GITHUB_RUN_NUMBER)" `
+                              -ModuleVersion "1.0.${{ vars.BUILD_NUMBER }}" `
                               -Author "David Koenig" `
                               -Guid "a2d16567-94f2-4a76-8e0d-c29d40177c56" `
                               -CompatiblePSEditions Core `
@@ -34,7 +40,7 @@ jobs:
                               -Tags "wsl,windows,linux,wsl2" `
                               -ProjectUri "https://github.com/shiftavenue/shiftavenue-pswslmanage" `
                               -IconUri "https://raw.githubusercontent.com/shiftavenue/shiftavenue-pswslmanage/main/Icon.png" `
-                              -Prerelease "dev$($env:GITHUB_RUN_NUMBER)"
+                              -Prerelease "dev${{ vars.BUILD_NUMBER }}"
         shell: pwsh
 
       - name: Publish testbuild
