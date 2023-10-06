@@ -19,7 +19,7 @@ jobs:
         with:
           path: ./pswslmanage
 
-      - name: Increase build variable
+      - name: Increase the build variable
         run: |
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           $_username="dummy"
