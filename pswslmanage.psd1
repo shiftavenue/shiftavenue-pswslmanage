@@ -1,7 +1,7 @@
 @{
 
     RootModule = 'pswslmanage.psm1'
-    ModuleVersion = '1.0.0'
+    ModuleVersion = '1.0.161'
     CompatiblePSEditions = 'Core'
     GUID = 'a2d16567-94f2-4a76-8e0d-c29d40177c56'
     PowerShellVersion = '5.1'

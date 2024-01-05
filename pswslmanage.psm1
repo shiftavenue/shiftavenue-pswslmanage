@@ -54,17 +54,20 @@ function Add-WslImage {
         .PARAMETER WslDistroName
             Define the name of the distribution you want to install.
 
+        .PARAMETER WslDisableKernelCheck
+            Because Microsoft is adding/changinga dn removing parameters in wsl.exe it is possible to disable the kernel version check. Currently this mandatory in Win11 (min 23H1).  
+
         .EXAMPLE
             Add-WSLImage
             Use the configuration file which is stored at $PSScriptRoot\pswslmanage.secret
 
         .EXAMPLE
-            Add-WSLImage -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslWorkUser work -WslRootPwd "Start123" -WslWorkUserPwd "Start123" -WslWorkUserDefault -WslDistroName Ubuntu2204
+            Add-WSLImage -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslDistroName Ubuntu2204
             Ignore configuration file and configure the WSL with parameters
 
         .EXAMPLE
-            Add-WSLImage -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslWorkUser work -WslWorkUserPwd "Start123" -WslWorkUserDefault -WslWorkUserSSHPubKey "ssh-rsa as4f$j..." -WslDistroName Ubuntu2204
-            Ignore configuration file and configure the WSL with parameters
+            Add-WSLImage -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslDistroName Ubuntu2204 -WslDisableKernelCheck
+            Ignore configuration file and configure the WSL with parameters. Also do not test the WSL kernel version which is neede on Win11 23H1 and later
     #>
 
     [CmdletBinding()]
@@ -86,7 +89,10 @@ function Add-WslImage {
 
         [Parameter(Mandatory=$false)]
         [ValidateSet("Ubuntu2004", "Ubuntu2204")]
-        [string]$WslDistroName
+        [string]$WslDistroName,
+
+        [Parameter(Mandatory=$false)]
+        [switch]$WslDisableKernelCheck
     )
 
     # Show header
@@ -106,7 +112,6 @@ function Add-WslImage {
     $_wslJson = $null
     $_wslMinMajorVersion = 5
     $_wslMinMinorVersion = 10
-    $_wslDisableKernelCheck = $False # This is for an emergency case and allows you to disable the kernel version
     $_wslImageExist = $False
 
     ##################################################################################
@@ -135,6 +140,7 @@ function Add-WslImage {
         [bool]$_wslRemoveExisting = $WslRemoveExisting
         [string]$_wslRootPwd = $WslRootPwd
         [string]$_wslDistroUniqueName = $WslDistroName
+        [bool]$_wslDisableKernelCheck = $WslDisableKernelCheck
     } else {
         Write-Output "Found configuration file in ""$WslConfigPath"""
         [string]$_wslBasePath =  $ExecutionContext.InvokeCommand.ExpandString($_wslJson.wslBasePath)
@@ -143,6 +149,7 @@ function Add-WslImage {
         [bool]$_wslRemoveExisting = $_wslJson.wslRemoveExisting
         [string]$_wslRootPwd = $_wslJson.wslRootPwd
         [string]$_wslDistroUniqueName = $_wslJson.wslDistroName
+        [bool]$_wslDisableKernelCheck = $_wslJson.wslDisableKernelCheck
     }
 
     ##################################################################################
@@ -195,6 +202,7 @@ function Add-WslImage {
     }
 
     # Check if image already exist
+    # TODO: Wenn "shiftavenue-xy" existiert, findet dieses Suche auch ein existierendes Images wenn anch "shiftavenue" gesucht wird 
     if(((wsl.exe -l).Replace("`0","")) -like "*${_wslName}*") {
         $_wslImageExist = $True
     }

@@ -24,6 +24,7 @@
     - [Stop image](#stop-image)
     - [Remove image](#remove-image)
     - [Get information from WSL](#get-information-from-wsl)
+    - [Add a user to the Wsl Image](#add-a-user-to-the-wsl-image)
     - [Add the SSH damon to an existing WSL](#add-the-ssh-damon-to-an-existing-wsl)
   - [Ideas / Backlog](#ideas--backlog)
   - [CI/CD](#cicd)
@@ -68,7 +69,7 @@ You can run the script just with input parameter. Please execute ```Get-Help Add
 
 ```powershell
 
-.\Add-WSLImage -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslDistroName Ubuntu2204 
+Add-WSLImage -WslConfigPath "" -WslName shiftavenue-ci -WslRemoveExisting -WslRootPwd "Start123" -WslDistroName Ubuntu2204 
 
 ```
 
@@ -104,7 +105,7 @@ Just call ```Stop-WslImage -WslName shiftavenue-ci``` to stop a running machine.
 ### Remove image
 
 The command ```Remove-WslImage -WslName shiftavenue-ci``` will remove the WSL like the ```--unregister``` switch of the wsl.exe will do. With the optional parameters "WslBasePath" and "WithFile" you can also remove all related binary files.
-Example:
+Example:A
 
 ```Remove-WSLImage -WslName shiftavenue-ci -WslBasePath c:\temp\shiftavenue\wsl-temp-maschine -WithFile```
 
@@ -121,6 +122,12 @@ The available values are:
 - IP
 - State
   
+### Add a user to the Wsl Image
+
+To add a user to the WSL image you can run the follwoing command 
+
+```Add-WslUser -WslName shiftavenue-ci -WslUser testuser -WslUserPwd "Start123"```
+
 ### Add the SSH damon to an existing WSL
 
 Its not very simple to add SSH to a WSL image, but for some scenarios its really useful to have that available. With the "Add-WslRoleSSH" it is totally easy to do that, just by executing the following command.  

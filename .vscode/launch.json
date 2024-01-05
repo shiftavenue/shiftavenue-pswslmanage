@@ -1,0 +1,15 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Create image",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "Import-Module ${workspaceFolder}/pswslmanage.psd1 -Force; Add-WSLImage -WslConfigPath \"\" -WslName \"shiftavenue\" -WslRemoveExisting -WslRootPwd \"dfajASDfh$2334\" -WslDistroName Ubuntu2204",
+            "args": []
+        }
+    ]
+}
