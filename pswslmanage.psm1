@@ -55,7 +55,7 @@ function Add-WslImage {
             Define the name of the distribution you want to install.
 
         .PARAMETER WslDisableKernelCheck
-            Because Microsoft is adding/changinga dn removing parameters in wsl.exe it is possible to disable the kernel version check. Currently this mandatory in Win11 (min 23H1).  
+            Because Microsoft is adding/changinga dn removing parameters in wsl.exe it is possible to disable the kernel version check. Currently this mandatory in Win11 (min 23H1).
 
         .EXAMPLE
             Add-WSLImage
@@ -202,7 +202,7 @@ function Add-WslImage {
     }
 
     # Check if image already exist
-    # TODO: Wenn "shiftavenue-xy" existiert, findet dieses Suche auch ein existierendes Images wenn anch "shiftavenue" gesucht wird 
+    # TODO: Wenn "shiftavenue-xy" existiert, findet dieses Suche auch ein existierendes Images wenn anch "shiftavenue" gesucht wird
     if(((wsl.exe -l).Replace("`0","")) -like "*${_wslName}*") {
         $_wslImageExist = $True
     }

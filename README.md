@@ -124,7 +124,7 @@ The available values are:
   
 ### Add a user to the Wsl Image
 
-To add a user to the WSL image you can run the follwoing command 
+To add a user to the WSL image you can run the follwoing command:
 
 ```Add-WslUser -WslName shiftavenue-ci -WslUser testuser -WslUserPwd "Start123"```
 
