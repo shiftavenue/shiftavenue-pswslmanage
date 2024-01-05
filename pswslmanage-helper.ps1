@@ -33,7 +33,7 @@ function Invoke-WSLCommand {
         Remove-Item "$($env:temp)\process_output_$Distribution.out"
     }
 
-    if($_wslProcess.ExitCode -ne 0) {
+    if($_wslProcess.ExitCode -ne 0 -and $null -eq $_wslProcess.ExitCode) {
         throw "Failed to execute command (Returncode: $($_wslProcess.ExitCode)). Command Details: ""$Command"". Leaving."
     }
 
